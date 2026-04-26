@@ -7,6 +7,7 @@ router.use(verifyToken);
 
 router.get('/organization', userController.getOrgUsers);
 router.post('/invite', userController.createUser);
+router.put('/profile', userController.updateProfile);
 router.put('/:id', isAdmin, userController.updateUser);
 router.delete('/:id', isAdmin, userController.deleteUser);
 

@@ -63,6 +63,28 @@ exports.updateUser = async (req, res) => {
     }
 };
 
+// Update Own Profile
+exports.updateProfile = async (req, res) => {
+  const { name, email, password } = req.body;
+  const userId = req.userId;
+
+  try {
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await db.execute('UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?', [name, email, hashedPassword, userId]);
+    } else {
+      await db.execute('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, userId]);
+    }
+    
+    await logActivity(req.userId, `Updated their profile`, 'User', userId);
+    res.json({ message: 'Profile updated successfully.' });
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ message: 'Email already exists' });
+    console.error(err);
+    res.status(500).json({ message: 'Error updating profile' });
+  }
+};
+
 // Remove User
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
