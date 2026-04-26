@@ -119,7 +119,7 @@ const Expenses = () => {
                 <p className="text-lg font-bold text-gray-900">-${parseFloat(exp.amount).toFixed(2)}</p>
                 {exp.receipt_url && (
                   <a 
-                    href={exp.receipt_url} 
+                    href={`${import.meta.env.VITE_UPLOAD_URL || 'http://localhost:5000'}${exp.receipt_url}`} 
                     target="_blank" 
                     rel="noreferrer"
                     className="text-xs text-primary-600 hover:underline flex items-center justify-end"
