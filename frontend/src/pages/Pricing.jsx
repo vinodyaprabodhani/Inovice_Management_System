@@ -1,6 +1,7 @@
 import React from 'react';
 import LandingLayout from '../components/LandingLayout';
 import { Check, ArrowRight, Zap, Building2, Rocket } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Pricing = () => {
   const plans = [
@@ -11,7 +12,8 @@ const Pricing = () => {
       features: ['5 Invoices / month', '1 Organization', 'Basic PDF Templates', 'Email Support'],
       icon: <Zap className="text-orange-500" />,
       color: 'bg-orange-50',
-      cta: 'Start for Free'
+      cta: 'Start for Free',
+      link: '/register'
     },
     {
       name: 'Professional',
@@ -21,7 +23,8 @@ const Pricing = () => {
       icon: <Rocket className="text-primary-600" />,
       color: 'bg-primary-50',
       popular: true,
-      cta: 'Get Started'
+      cta: 'Get Started',
+      link: '/register'
     },
     {
       name: 'Enterprise',
@@ -30,7 +33,8 @@ const Pricing = () => {
       features: ['Unlimited Everything', 'Dedicated Manager', 'API Access', 'Custom Branding', 'SLA Guarantee'],
       icon: <Building2 className="text-purple-600" />,
       color: 'bg-purple-50',
-      cta: 'Contact Sales'
+      cta: 'Contact Sales',
+      link: '/contact'
     }
   ];
 
@@ -82,10 +86,10 @@ const Pricing = () => {
                    ))}
                 </div>
 
-                <button className={`w-full py-4 rounded-2xl font-black transition-all flex items-center justify-center gap-2 ${plan.popular ? 'bg-primary-600 text-white shadow-xl shadow-primary-200 hover:bg-primary-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}>
+                <Link to={plan.link} className={`w-full py-4 rounded-2xl font-black transition-all flex items-center justify-center gap-2 ${plan.popular ? 'bg-primary-600 text-white shadow-xl shadow-primary-200 hover:bg-primary-700' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}>
                    {plan.cta}
                    <ArrowRight size={18} />
-                </button>
+                </Link>
               </div>
             ))}
           </div>

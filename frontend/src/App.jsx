@@ -23,6 +23,7 @@ import WhatsAppSettings from './pages/WhatsAppSettings';
 import Reports from './pages/Reports';
 import ClientInvoiceView from './pages/ClientInvoiceView';
 import PaymentPortal from './pages/PaymentPortal';
+import LegalPage from './pages/LegalPage';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -48,6 +49,9 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/portal/invoice/:token" element={<ClientInvoiceView />} />
           <Route path="/portal/pay/:token" element={<PaymentPortal />} />
+          <Route path="/privacy" element={<LegalPage title="Privacy Policy" />} />
+          <Route path="/terms" element={<LegalPage title="Terms of Service" />} />
+          <Route path="/cookies" element={<LegalPage title="Cookie Policy" />} />
 
           {/* Private Routes */}
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
