@@ -67,17 +67,33 @@ exports.updateUser = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   const { name, email, password } = req.body;
   const userId = req.userId;
+  let avatarUrl = null;
+
+  if (req.file) {
+    avatarUrl = `/uploads/avatars/${req.file.filename}`;
+  }
 
   try {
+    let query = 'UPDATE users SET name = ?, email = ?';
+    const queryParams = [name, email];
+
     if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      await db.execute('UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?', [name, email, hashedPassword, userId]);
-    } else {
-      await db.execute('UPDATE users SET name = ?, email = ? WHERE id = ?', [name, email, userId]);
+      query += ', password = ?';
+      queryParams.push(await bcrypt.hash(password, 10));
     }
+
+    if (avatarUrl) {
+      query += ', avatar = ?';
+      queryParams.push(avatarUrl);
+    }
+
+    query += ' WHERE id = ?';
+    queryParams.push(userId);
+
+    await db.execute(query, queryParams);
     
     await logActivity(req.userId, `Updated their profile`, 'User', userId);
-    res.json({ message: 'Profile updated successfully.' });
+    res.json({ message: 'Profile updated successfully.', avatar: avatarUrl });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ message: 'Email already exists' });
     console.error(err);

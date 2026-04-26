@@ -154,8 +154,12 @@ const Layout = ({ children, title }) => {
                 <p className="text-sm font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">{user?.name}</p>
                 <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary-600 to-primary-400 flex items-center justify-center text-white font-bold shadow-lg shadow-primary-200 group-hover:scale-105 transition-transform">
-                {user?.name?.charAt(0).toUpperCase()}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary-600 to-primary-400 flex items-center justify-center text-white font-bold shadow-lg shadow-primary-200 group-hover:scale-105 transition-transform overflow-hidden">
+                {user?.avatar ? (
+                  <img src={`${import.meta.env.VITE_UPLOAD_URL || 'http://localhost:5000'}${user.avatar}`} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  user?.name?.charAt(0).toUpperCase()
+                )}
               </div>
             </Link>
           </div>

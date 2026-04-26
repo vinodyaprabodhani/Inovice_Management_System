@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Shield, Building, LogOut, Edit2, X, Check, Save, Lock } from 'lucide-react';
+import { User, Mail, Shield, Building, LogOut, Edit2, X, Check, Save, Lock, Camera } from 'lucide-react';
 import api from '../api/axios';
 
 const Profile = () => {
@@ -11,6 +11,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatar ? `${import.meta.env.VITE_UPLOAD_URL || 'http://localhost:5000'}${user.avatar}` : null);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -21,11 +23,21 @@ const Profile = () => {
     setIsEditing(!isEditing);
     setError('');
     setMessage('');
+    setAvatarFile(null);
+    setAvatarPreview(user?.avatar ? `${import.meta.env.VITE_UPLOAD_URL || 'http://localhost:5000'}${user.avatar}` : null);
     setFormData({
       name: user?.name || '',
       email: user?.email || '',
       password: ''
     });
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -34,10 +46,16 @@ const Profile = () => {
     setError('');
     setMessage('');
     try {
-      const payload = { name: formData.name, email: formData.email };
-      if (formData.password) payload.password = formData.password;
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('email', formData.email);
+      if (formData.password) data.append('password', formData.password);
+      if (avatarFile) data.append('avatar', avatarFile);
       
-      const res = await api.put('/users/profile', payload);
+      const res = await api.put('/users/profile', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
       setMessage(res.data.message);
       setIsEditing(false);
       
@@ -45,6 +63,7 @@ const Profile = () => {
       if (localUser) {
         localUser.name = formData.name;
         localUser.email = formData.email;
+        if (res.data.avatar) localUser.avatar = res.data.avatar;
         localStorage.setItem('user', JSON.stringify(localUser));
       }
     } catch (err) {
@@ -79,8 +98,20 @@ const Profile = () => {
           <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-primary-600 to-blue-400 opacity-10 pointer-events-none"></div>
           
           <div className="flex items-center gap-8 relative z-10 w-full md:w-auto">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-primary-600 to-primary-400 flex items-center justify-center text-white font-black text-4xl shadow-xl shadow-primary-200 shrink-0 border-4 border-white">
-              {(formData.name || user?.name || 'U').charAt(0).toUpperCase()}
+            <div className="relative group">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-primary-600 to-primary-400 flex items-center justify-center text-white font-black text-4xl shadow-xl shadow-primary-200 shrink-0 border-4 border-white overflow-hidden">
+                {avatarPreview ? (
+                  <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  (formData.name || user?.name || 'U').charAt(0).toUpperCase()
+                )}
+              </div>
+              {isEditing && (
+                <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary-600 text-white rounded-full shadow-lg border-2 border-white flex items-center justify-center cursor-pointer hover:bg-primary-700 transition-colors">
+                  <Camera size={14} />
+                  <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
+                </label>
+              )}
             </div>
             
             <div className="flex-1">
