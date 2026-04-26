@@ -19,6 +19,7 @@ const StaffManagement = () => {
   const { user: currentUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,6 +29,14 @@ const StaffManagement = () => {
 
   useEffect(() => {
     fetchUsers();
+    
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.user-dropdown-container')) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchUsers = async () => {
@@ -65,6 +74,28 @@ const StaffManagement = () => {
     }
   };
 
+  const handleUpdateRole = async (id, newRole, currentActive) => {
+    try {
+      await api.put(`/users/${id}`, { role: newRole, is_active: currentActive });
+      fetchUsers();
+      setActiveDropdown(null);
+    } catch (err) {
+      console.error('Error updating user', err);
+      alert(err.response?.data?.message || 'Failed to update user');
+    }
+  };
+
+  const handleToggleActive = async (id, currentRole, newActiveStatus) => {
+    try {
+      await api.put(`/users/${id}`, { role: currentRole, is_active: newActiveStatus ? 1 : 0 });
+      fetchUsers();
+      setActiveDropdown(null);
+    } catch (err) {
+      console.error('Error updating user', err);
+      alert(err.response?.data?.message || 'Failed to update user');
+    }
+  };
+
   return (
     <Layout title="Staff Management">
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -86,11 +117,31 @@ const StaffManagement = () => {
         {loading ? (
              [...Array(3)].map((_, i) => <div key={i} className="h-48 bg-gray-100 rounded-3xl animate-pulse"></div>)
         ) : users.map(user => (
-            <div key={user.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative group">
+            <div key={user.id} className={`bg-white p-6 rounded-3xl border ${user.is_active ? 'border-gray-100' : 'border-red-100 bg-red-50/10'} shadow-sm relative group user-dropdown-container`}>
                 <div className="absolute top-6 right-6">
-                    <button className="p-2 text-gray-300 hover:text-gray-600">
+                    <button 
+                      onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
+                      className="p-2 text-gray-300 hover:text-gray-600 focus:outline-none"
+                    >
                         <MoreVertical size={18} />
                     </button>
+                    {activeDropdown === user.id && currentUser?.role === 'admin' && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                        <div className="p-2 flex flex-col">
+                          {user.role === 'staff' ? (
+                            <button onClick={() => handleUpdateRole(user.id, 'admin', user.is_active)} className="text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Make Admin</button>
+                          ) : (
+                            <button onClick={() => handleUpdateRole(user.id, 'staff', user.is_active)} className="text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Revoke Admin</button>
+                          )}
+                          
+                          {user.is_active ? (
+                            <button onClick={() => handleToggleActive(user.id, user.role, false)} className="text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg">Deactivate User</button>
+                          ) : (
+                            <button onClick={() => handleToggleActive(user.id, user.role, true)} className="text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 rounded-lg">Activate User</button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-4 mb-6">
@@ -98,7 +149,9 @@ const StaffManagement = () => {
                         {user.name.charAt(0)}
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 line-clamp-1">{user.name}</h3>
+                        <h3 className="font-bold text-gray-900 line-clamp-1">
+                          {user.name} {!user.is_active && <span className="text-xs text-red-500 font-normal ml-2">(Inactive)</span>}
+                        </h3>
                         <p className="text-xs text-gray-500 flex items-center gap-1">
                             <Mail size={12} /> {user.email}
                         </p>
