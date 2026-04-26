@@ -3,6 +3,7 @@
 A modern, professional, cloud-ready SaaS Invoice Management System designed for businesses to streamline billing, customer relationships, and financial tracking.
 
 ## 🚀 Key Features
+
 - **Comprehensive Dashboard**: Real-time revenue analytics, outstanding invoices, and expense oversight using beautiful Recharts visualizations.
 - **Advanced Invoice Engine**: Modular creation system with automated tax calculations, discounts, and professional branding.
 - **Multi-Channel Notifications**: Built-in support for **Email** (Nodemailer) and **WhatsApp** (Twilio/WhatsApp Business API) invoice delivery.
@@ -13,6 +14,7 @@ A modern, professional, cloud-ready SaaS Invoice Management System designed for 
 - **Branding & Customization**: Upload company logos and customize invoice themes.
 
 ## 🛠️ Tech Stack
+
 - **Frontend**: React 19, Vite, Tailwind CSS (Utility-first styling), Lucide Icons, Recharts (Analytics).
 - **Backend**: Node.js, Express.js (Modular Controller Architecture).
 - **Database**: MySQL (Optimized for multi-organization scaling).
@@ -20,6 +22,7 @@ A modern, professional, cloud-ready SaaS Invoice Management System designed for 
 - **Services**: Twilio (WhatsApp), Nodemailer (Email), PDFKit (Invoice PDF Generation).
 
 ## 📋 Prerequisites
+
 - **Node.js**: v18.0.0+
 - **MySQL**: Server running locally (XAMPP/WAMP) or on a cloud provider.
 - **Optional**: Twilio Account (for WhatsApp), SMTP Server (for Email).
@@ -27,13 +30,16 @@ A modern, professional, cloud-ready SaaS Invoice Management System designed for 
 ## ⚙️ Installation & Setup
 
 ### 1. Database Configuration
+
 1. Create a database in MySQL: `CREATE DATABASE invoice_management;`
 2. Import the `database.sql` file from the root directory into your database.
 
 ### 2. Backend Installation
+
 1. Navigate to `/backend`.
 2. Install dependencies: `npm install`
 3. Configure environment variables in `.env`:
+
    ```env
    PORT=5000
    DB_HOST=localhost
@@ -52,16 +58,20 @@ A modern, professional, cloud-ready SaaS Invoice Management System designed for 
    TWILIO_SID=your_sid
    TWILIO_TOKEN=your_token
    ```
+
 4. Start the server: `npm run dev`
 
 ### 3. Frontend Installation
+
 1. Navigate to `/frontend`.
 2. Install dependencies: `npm install`
 3. Start the application: `npm run dev`
 4. Access the app at `http://localhost:5173`.
 
 ### 4. Demo Data (Recommended)
+
 To quickly populate the system with professional demo data:
+
 1. Open a terminal in `/backend`.
 2. Run: `node scripts/seed.js`
 3. **Login Details**:
@@ -69,6 +79,7 @@ To quickly populate the system with professional demo data:
    - **Password**: `password123`
 
 ## 📁 Project Structure
+
 ```text
 /backend
   /controllers  - Business logic handlers
@@ -82,6 +93,3 @@ To quickly populate the system with professional demo data:
   /src/context  - State management (Auth)
 /uploads        - Local storage for receipts and logos
 ```
-
-## ⚖️ License
-MIT License. Professional Business Solution.
