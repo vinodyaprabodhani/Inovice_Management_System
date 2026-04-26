@@ -65,12 +65,14 @@ exports.updateUser = async (req, res) => {
 
 // Update Own Profile
 exports.updateProfile = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, removeAvatar } = req.body;
   const userId = req.userId;
   let avatarUrl = null;
 
   if (req.file) {
     avatarUrl = `/uploads/avatars/${req.file.filename}`;
+  } else if (removeAvatar === 'true') {
+    avatarUrl = 'REMOVE';
   }
 
   try {
@@ -82,7 +84,9 @@ exports.updateProfile = async (req, res) => {
       queryParams.push(await bcrypt.hash(password, 10));
     }
 
-    if (avatarUrl) {
+    if (avatarUrl === 'REMOVE') {
+      query += ', avatar = NULL';
+    } else if (avatarUrl) {
       query += ', avatar = ?';
       queryParams.push(avatarUrl);
     }

@@ -12,6 +12,7 @@ const Profile = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [avatarFile, setAvatarFile] = useState(null);
+  const [removeAvatar, setRemoveAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar ? `${import.meta.env.VITE_UPLOAD_URL || 'http://localhost:5000'}${user.avatar}` : null);
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -24,6 +25,7 @@ const Profile = () => {
     setError('');
     setMessage('');
     setAvatarFile(null);
+    setRemoveAvatar(false);
     setAvatarPreview(user?.avatar ? `${import.meta.env.VITE_UPLOAD_URL || 'http://localhost:5000'}${user.avatar}` : null);
     setFormData({
       name: user?.name || '',
@@ -36,6 +38,7 @@ const Profile = () => {
     const file = e.target.files[0];
     if (file) {
       setAvatarFile(file);
+      setRemoveAvatar(false);
       setAvatarPreview(URL.createObjectURL(file));
     }
   };
@@ -51,6 +54,7 @@ const Profile = () => {
       data.append('email', formData.email);
       if (formData.password) data.append('password', formData.password);
       if (avatarFile) data.append('avatar', avatarFile);
+      if (removeAvatar) data.append('removeAvatar', 'true');
       
       const res = await api.put('/users/profile', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -63,7 +67,8 @@ const Profile = () => {
       if (localUser) {
         localUser.name = formData.name;
         localUser.email = formData.email;
-        if (res.data.avatar) localUser.avatar = res.data.avatar;
+        if (removeAvatar) localUser.avatar = null;
+        else if (res.data.avatar && res.data.avatar !== 'REMOVE') localUser.avatar = res.data.avatar;
         localStorage.setItem('user', JSON.stringify(localUser));
       }
     } catch (err) {
@@ -107,10 +112,26 @@ const Profile = () => {
                 )}
               </div>
               {isEditing && (
-                <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary-600 text-white rounded-full shadow-lg border-2 border-white flex items-center justify-center cursor-pointer hover:bg-primary-700 transition-colors">
-                  <Camera size={14} />
-                  <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
-                </label>
+                <div className="absolute -bottom-2 -right-2 flex gap-1">
+                  <label className="w-8 h-8 bg-primary-600 text-white rounded-full shadow-lg border-2 border-white flex items-center justify-center cursor-pointer hover:bg-primary-700 transition-colors">
+                    <Camera size={14} />
+                    <input type="file" className="hidden" onChange={handleAvatarChange} accept="image/*" />
+                  </label>
+                  {avatarPreview && (
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        setAvatarPreview(null);
+                        setAvatarFile(null);
+                        setRemoveAvatar(true);
+                      }}
+                      className="w-8 h-8 bg-red-500 text-white rounded-full shadow-lg border-2 border-white flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors"
+                      title="Remove Avatar"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
               )}
             </div>
             
