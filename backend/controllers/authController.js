@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { sendWelcomeEmail } = require('../utils/mailer');
 require('dotenv').config();
 
 // Register
@@ -29,6 +30,9 @@ exports.register = async (req, res) => {
       'INSERT INTO users (organization_id, name, email, password, role) VALUES (?, ?, ?, ?, ?)',
       [orgId, name, email, hashedPassword, 'admin']
     );
+
+    // 5. Send Welcome Email
+    await sendWelcomeEmail(email, name, organizationName || `${name}'s Organization`);
 
     res.status(201).json({ message: 'User registered successfully', userId: userResult.insertId });
   } catch (err) {

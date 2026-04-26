@@ -1,14 +1,35 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'sandbox.smtp.mailtrap.io',
-  port: process.env.SMTP_PORT || 2525,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
+let transporter = null;
+
+const getTransporter = async () => {
+  if (transporter) return transporter;
+
+  if (process.env.SMTP_USER === 'your_user_id' || !process.env.SMTP_USER) {
+    console.log("No real SMTP credentials found. Setting up Ethereal Email for testing...");
+    const testAccount = await nodemailer.createTestAccount();
+    transporter = nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+    });
+  } else {
+    transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'sandbox.smtp.mailtrap.io',
+      port: process.env.SMTP_PORT || 2525,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    });
   }
-});
+  return transporter;
+};
 
 exports.sendInvoiceEmail = async (to, invoice) => {
   const mailOptions = {
@@ -32,8 +53,12 @@ exports.sendInvoiceEmail = async (to, invoice) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    const t = await getTransporter();
+    const info = await t.sendMail(mailOptions);
     console.log(`Email sent to ${to}`);
+    if (info.messageId && nodemailer.getTestMessageUrl(info)) {
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    }
     return true;
   } catch (err) {
     console.error('Error sending email:', err);
@@ -63,7 +88,12 @@ exports.sendPaymentConfirmationEmail = async (to, invoice, paymentDetails) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    const t = await getTransporter();
+    const info = await t.sendMail(mailOptions);
+    console.log(`Receipt sent to ${to}`);
+    if (info.messageId && nodemailer.getTestMessageUrl(info)) {
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    }
     return true;
   } catch (err) {
     console.error('Error sending receipt:', err);
@@ -91,7 +121,12 @@ exports.sendReminderEmail = async (to, invoice) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    const t = await getTransporter();
+    const info = await t.sendMail(mailOptions);
+    console.log(`Reminder sent to ${to}`);
+    if (info.messageId && nodemailer.getTestMessageUrl(info)) {
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    }
     return true;
   } catch (err) {
     console.error('Error sending reminder:', err);
@@ -121,7 +156,12 @@ exports.sendOverdueEmail = async (to, invoice) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    const t = await getTransporter();
+    const info = await t.sendMail(mailOptions);
+    console.log(`Overdue notice sent to ${to}`);
+    if (info.messageId && nodemailer.getTestMessageUrl(info)) {
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    }
     return true;
   } catch (err) {
     console.error('Error sending overdue notice:', err);
@@ -150,11 +190,46 @@ exports.sendInviteEmail = async (to, name, orgName, password) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    const t = await getTransporter();
+    const info = await t.sendMail(mailOptions);
     console.log(`Invite email sent to ${to}`);
+    if (info.messageId && nodemailer.getTestMessageUrl(info)) {
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    }
     return true;
   } catch (err) {
     console.error('Error sending invite email:', err);
+    return false;
+  }
+};
+
+exports.sendWelcomeEmail = async (to, name, orgName) => {
+  const mailOptions = {
+    from: process.env.FROM_EMAIL || '"Invoice System" <noreply@invoicems.com>',
+    to: to,
+    subject: `Welcome to Invoice System, ${name}!`,
+    html: `
+      <div style="font-family: sans-serif; padding: 20px;">
+        <h2>Welcome to the Invoice System!</h2>
+        <p>Hi ${name},</p>
+        <p>Your account for <strong>${orgName}</strong> has been successfully created.</p>
+        <p>You can now log in to manage your invoices, track payments, and more.</p>
+        <p><a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" style="display: inline-block; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px;">Go to Dashboard</a></p>
+        <p>Thank you for joining us!</p>
+      </div>
+    `
+  };
+
+  try {
+    const t = await getTransporter();
+    const info = await t.sendMail(mailOptions);
+    console.log(`Welcome email sent to ${to}`);
+    if (info.messageId && nodemailer.getTestMessageUrl(info)) {
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    }
+    return true;
+  } catch (err) {
+    console.error('Error sending welcome email:', err);
     return false;
   }
 };
