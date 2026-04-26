@@ -24,6 +24,7 @@ import Reports from './pages/Reports';
 import ClientInvoiceView from './pages/ClientInvoiceView';
 import PaymentPortal from './pages/PaymentPortal';
 import LegalPage from './pages/LegalPage';
+import Profile from './pages/Profile';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -66,6 +67,7 @@ const App = () => {
           <Route path="/whatsapp" element={<PrivateRoute><WhatsAppSettings /></PrivateRoute>} />
           <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" />} />

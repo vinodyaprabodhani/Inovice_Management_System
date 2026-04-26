@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './Sidebar';
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 import { Bell, Search, Mail, HelpCircle } from 'lucide-react';
 
 const Layout = ({ children, title }) => {
@@ -148,15 +149,15 @@ const Layout = ({ children, title }) => {
 
             <div className="h-8 w-px bg-gray-200"></div>
 
-            <div className="flex items-center gap-3">
+            <Link to="/profile" className="flex items-center gap-3 hover:bg-gray-50 p-1.5 pr-4 rounded-2xl transition-colors cursor-pointer group">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
+                <p className="text-sm font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">{user?.name}</p>
                 <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
               </div>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary-600 to-primary-400 flex items-center justify-center text-white font-bold shadow-lg shadow-primary-200">
-                {user?.name?.charAt(0)}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary-600 to-primary-400 flex items-center justify-center text-white font-bold shadow-lg shadow-primary-200 group-hover:scale-105 transition-transform">
+                {user?.name?.charAt(0).toUpperCase()}
               </div>
-            </div>
+            </Link>
           </div>
         </header>
 
