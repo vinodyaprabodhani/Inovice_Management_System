@@ -25,6 +25,8 @@ import ClientInvoiceView from './pages/ClientInvoiceView';
 import PaymentPortal from './pages/PaymentPortal';
 import LegalPage from './pages/LegalPage';
 import Profile from './pages/Profile';
+import Documentation from './pages/Documentation';
+import Support from './pages/Support';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -68,6 +70,8 @@ const App = () => {
           <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route path="/docs" element={<PrivateRoute><Documentation /></PrivateRoute>} />
+          <Route path="/support" element={<PrivateRoute><Support /></PrivateRoute>} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" />} />

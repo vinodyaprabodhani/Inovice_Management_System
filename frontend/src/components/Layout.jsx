@@ -133,10 +133,10 @@ const Layout = ({ children, title }) => {
                       <h3 className="font-semibold text-gray-900">Help & Support</h3>
                     </div>
                     <div className="p-2">
-                      <Link to="/features" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                      <Link to="/docs" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <span className="font-medium">Documentation</span>
                       </Link>
-                      <Link to="/contact" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                      <Link to="/support" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <span className="font-medium">Contact Support</span>
                       </Link>
                       <button 
