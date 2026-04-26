@@ -29,10 +29,10 @@ const Documentation = () => {
   return (
     <Layout title="Documentation">
       <div className="max-w-6xl mx-auto space-y-8">
-        <div className="bg-gradient-to-r from-primary-600 to-blue-600 rounded-3xl p-10 text-white shadow-lg relative overflow-hidden">
+        <div className="bg-gradient-to-r from-primary-600 to-blue-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
            <div className="relative z-10">
-             <h1 className="text-4xl font-black mb-4">How can we help you?</h1>
-             <p className="text-primary-100 text-lg max-w-xl">Search our knowledge base or browse the categories below to find exactly what you're looking for.</p>
+             <h1 className="text-3xl font-black mb-2">How can we help you?</h1>
+             <p className="text-primary-100 text-base max-w-xl">Search our knowledge base or browse the categories below to find exactly what you're looking for.</p>
            </div>
            <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         </div>
