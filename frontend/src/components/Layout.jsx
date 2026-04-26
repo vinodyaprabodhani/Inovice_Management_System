@@ -11,6 +11,7 @@ const Layout = ({ children, title }) => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -132,15 +133,21 @@ const Layout = ({ children, title }) => {
                       <h3 className="font-semibold text-gray-900">Help & Support</h3>
                     </div>
                     <div className="p-2">
-                      <a href="#" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                      <Link to="/features" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <span className="font-medium">Documentation</span>
-                      </a>
-                      <a href="#" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                      </Link>
+                      <Link to="/contact" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                         <span className="font-medium">Contact Support</span>
-                      </a>
-                      <a href="#" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                      </Link>
+                      <button 
+                        onClick={() => {
+                          setActiveDropdown(null);
+                          setIsShortcutsOpen(true);
+                        }} 
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
                         <span className="font-medium">Keyboard Shortcuts</span>
-                      </a>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -166,8 +173,45 @@ const Layout = ({ children, title }) => {
         </header>
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 p-8 overflow-y-auto">
+        <main className="flex-1 p-8 overflow-y-auto relative">
           {children}
+
+          {/* Keyboard Shortcuts Modal */}
+          {isShortcutsOpen && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                  <h3 className="font-bold text-gray-900 text-lg">Keyboard Shortcuts</h3>
+                  <button onClick={() => setIsShortcutsOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">New Invoice</span>
+                    <kbd className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs font-mono text-gray-600 font-bold">Ctrl + I</kbd>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">Search</span>
+                    <kbd className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs font-mono text-gray-600 font-bold">Ctrl + K</kbd>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">Go to Dashboard</span>
+                    <kbd className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs font-mono text-gray-600 font-bold">G then D</kbd>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">Close Modals</span>
+                    <kbd className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs font-mono text-gray-600 font-bold">Esc</kbd>
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+                  <button onClick={() => setIsShortcutsOpen(false)} className="px-4 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                    Done
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>
