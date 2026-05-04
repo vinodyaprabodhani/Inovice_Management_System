@@ -354,3 +354,49 @@ exports.sendWelcomeEmail = async (to, name, orgName) => {
     return false;
   }
 };
+
+exports.sendLoginEmail = async (to, name, orgName) => {
+  const time = new Date().toLocaleString();
+  const mailOptions = {
+    from: process.env.FROM_EMAIL || '"InvoicePro System" <noreply@invoicems.com>',
+    to: to,
+    subject: `New Login to InvoicePro System`,
+    html: generateEmailTemplate(
+      'New Login Detected',
+      `
+      <div class="greeting">Hello ${name},</div>
+      <p>We detected a new login to your account for <strong>${orgName}</strong>.</p>
+      
+      <div class="data-box" style="border-left: 4px solid #3b82f6;">
+        <div class="data-row">
+          <span class="data-label">Time</span>
+          <span class="data-value">${time}</span>
+        </div>
+        <div class="data-row">
+          <span class="data-label">Account</span>
+          <span class="data-value">${to}</span>
+        </div>
+      </div>
+      
+      <p>If this was you, you can safely ignore this email.</p>
+      <div class="text-center" style="margin-top: 24px;">
+        <p style="color: #6b7280; font-size: 14px;">If you didn't log in recently, please contact support or reset your password immediately.</p>
+      </div>
+      `,
+      `New login detected for your account`
+    )
+  };
+
+  try {
+    const t = await getTransporter();
+    const info = await t.sendMail(mailOptions);
+    console.log(`Login email sent to ${to}`);
+    if (info.messageId && nodemailer.getTestMessageUrl(info)) {
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    }
+    return true;
+  } catch (err) {
+    console.error('Error sending login email:', err);
+    return false;
+  }
+};

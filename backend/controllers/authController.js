@@ -1,7 +1,7 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { sendWelcomeEmail } = require('../utils/mailer');
+const { sendWelcomeEmail, sendLoginEmail } = require('../utils/mailer');
 require('dotenv').config();
 
 // Register
@@ -69,6 +69,9 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET || 'supersecretkey123',
       { expiresIn: '24h' }
     );
+
+    // 4. Send Login Confirmation Email
+    sendLoginEmail(user.email, user.name, user.org_name);
 
     res.json({
       token,
