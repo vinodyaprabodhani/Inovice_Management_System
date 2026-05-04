@@ -1,6 +1,5 @@
 const db = require('../config/db');
 const { logActivity } = require('../utils/logger');
-const twilio = require('twilio');
 
 // Record Payment
 exports.recordPayment = async (req, res) => {
@@ -86,19 +85,9 @@ exports.processPortalPayment = async (req, res) => {
 
     await connection.execute('UPDATE invoices SET status = ? WHERE id = ?', [status, inv.id]);
 
-    // 4. WhatsApp Notification if configured
-    if (inv.whatsapp_sid && inv.whatsapp_token && inv.customer_phone) {
-        try {
-            const client = twilio(inv.whatsapp_sid, inv.whatsapp_token);
-            await client.messages.create({
-                from: `whatsapp:${inv.whatsapp_phone}`,
-                to: `whatsapp:${inv.customer_phone}`,
-                body: `Payment Confirmed! Thank you ${inv.customer_name}, we received your payment of ${amount} for invoice #${inv.invoice_number}. - ${inv.org_name}`
-            });
-        } catch (notifErr) {
-            console.error('WhatsApp Notification failed but payment succeeded', notifErr);
-        }
-    }
+    // 4. Trigger Payment Confirmation Notification (Email & WhatsApp)
+    const { sendPaymentConfirmation } = require('./notificationController');
+    sendPaymentConfirmation(inv.id, amount, method, inv.organization_id);
 
     await connection.commit();
     res.json({ message: 'Payment successfully processed' });
