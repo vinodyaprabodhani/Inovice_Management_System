@@ -19,22 +19,18 @@ const Home = () => {
       <section className="relative pt-16 pb-24 lg:pt-32 lg:pb-40 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-4xl mx-auto mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 text-primary-700 text-sm font-bold mb-8 animate-in fade-in slide-in-from-bottom duration-500">
-               <span className="flex h-2 w-2 rounded-full bg-primary-600 animate-pulse"></span>
-               New: WhatsApp Invoice Notifications are here!
-            </div>
-            <h1 className="text-5xl lg:text-7xl font-black text-gray-900 tracking-tight leading-[1.1] mb-8 animate-in fade-in slide-in-from-bottom duration-700">
+            <h1 className="text-4xl lg:text-6xl font-black text-gray-900 tracking-tight leading-[1.1] mb-8 animate-in fade-in slide-in-from-bottom duration-700">
               Invoicing that <span className="text-primary-600">moves as fast</span> as your business.
             </h1>
-            <p className="text-xl text-gray-500 leading-relaxed mb-10 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom duration-1000">
+            <p className="text-lg text-gray-500 leading-relaxed mb-10 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom duration-1000">
               The only platform that combines professional PDF invoicing with real-time WhatsApp alerts and powerful revenue analytics. Built for modern teams.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
-              <Link to="/register" className="w-full sm:w-auto px-8 py-4 bg-primary-600 text-white font-black rounded-2xl shadow-xl shadow-primary-200 hover:bg-primary-700 hover:-translate-y-1 transition-all text-lg flex items-center justify-center gap-2">
+              <Link to="/register" className="w-full sm:w-auto px-8 py-4 bg-primary-600 text-white font-black rounded-2xl shadow-xl shadow-primary-200 hover:bg-primary-700 hover:-translate-y-1 transition-all text-base flex items-center justify-center gap-2">
                 Start 14-day Free Trial
                 <ArrowRight size={20} />
               </Link>
-              <Link to="/features" className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 font-bold rounded-2xl border border-gray-200 hover:bg-gray-50 transition-all text-lg">
+              <Link to="/features" className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 font-bold rounded-2xl border border-gray-200 hover:bg-gray-50 transition-all text-base">
                 View Features
               </Link>
             </div>
