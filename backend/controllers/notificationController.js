@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const { sendInvoiceEmail, sendPaymentConfirmationEmail, sendReminderEmail, sendOverdueEmail } = require('../utils/mailer');
 const twilio = require('twilio');
+const { decrypt } = require('../utils/crypto');
 
 // Send Invoice via Email
 exports.sendEmailInvoice = async (req, res) => {
@@ -57,6 +58,9 @@ exports.sendWhatsAppInvoice = async (req, res) => {
       const invoice = invoices[0];
       if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
       if (!invoice.customer_phone) return res.status(400).json({ message: 'Customer phone number missing' });
+
+      if (org.whatsapp_sid) org.whatsapp_sid = decrypt(org.whatsapp_sid);
+      if (org.whatsapp_token) org.whatsapp_token = decrypt(org.whatsapp_token);
   
       if (!org.whatsapp_sid || !org.whatsapp_token) {
           return res.status(400).json({ message: 'WhatsApp configuration missing in settings' });
@@ -95,6 +99,9 @@ exports.testWhatsApp = async (req, res) => {
       );
   
       const org = orgs[0];
+      if (org.whatsapp_sid) org.whatsapp_sid = decrypt(org.whatsapp_sid);
+      if (org.whatsapp_token) org.whatsapp_token = decrypt(org.whatsapp_token);
+
       if (!org.whatsapp_sid || !org.whatsapp_token) {
         return res.status(400).json({ message: 'WhatsApp configuration missing' });
       }
@@ -130,6 +137,8 @@ exports.triggerPaymentReminder = async (req, res) => {
 
     if (invoices.length === 0) return res.status(404).json({ message: 'Invoice not found' });
     const invoice = invoices[0];
+    if (invoice.whatsapp_sid) invoice.whatsapp_sid = decrypt(invoice.whatsapp_sid);
+    if (invoice.whatsapp_token) invoice.whatsapp_token = decrypt(invoice.whatsapp_token);
 
     // Email
     if (invoice.customer_email) {
@@ -178,6 +187,8 @@ exports.triggerOverdueNotice = async (req, res) => {
 
     if (invoices.length === 0) return res.status(404).json({ message: 'Invoice not found' });
     const invoice = invoices[0];
+    if (invoice.whatsapp_sid) invoice.whatsapp_sid = decrypt(invoice.whatsapp_sid);
+    if (invoice.whatsapp_token) invoice.whatsapp_token = decrypt(invoice.whatsapp_token);
 
     // Email
     if (invoice.customer_email) {
@@ -223,6 +234,8 @@ exports.sendPaymentConfirmation = async (invoiceId, amount, method, orgId) => {
 
     if (invoices.length === 0) return;
     const invoice = invoices[0];
+    if (invoice.whatsapp_sid) invoice.whatsapp_sid = decrypt(invoice.whatsapp_sid);
+    if (invoice.whatsapp_token) invoice.whatsapp_token = decrypt(invoice.whatsapp_token);
     const paymentDetails = { amount, method };
 
     // Email
@@ -266,6 +279,8 @@ exports.dispatchInvoiceNotifications = async (invoiceId, orgId) => {
 
     if (invoices.length === 0) return;
     const invoice = invoices[0];
+    if (invoice.whatsapp_sid) invoice.whatsapp_sid = decrypt(invoice.whatsapp_sid);
+    if (invoice.whatsapp_token) invoice.whatsapp_token = decrypt(invoice.whatsapp_token);
 
     // Email
     if (invoice.customer_email) {
