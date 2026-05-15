@@ -54,14 +54,31 @@ const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
   const [filter, setFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const filterRef = React.useRef(null);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1); // Reset page on new search
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filter, dateFilter]);
+
+  useEffect(() => {
     fetchInvoices();
-    
+  }, [debouncedSearch, filter, dateFilter, page]);
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (filterRef.current && !filterRef.current.contains(event.target)) {
         setShowFilters(false);
@@ -72,9 +89,19 @@ const Invoices = () => {
   }, []);
 
   const fetchInvoices = async () => {
+    setLoading(true);
     try {
-      const res = await api.get('/invoices');
-      setInvoices(res.data);
+      const res = await api.get('/invoices', {
+        params: {
+          search: debouncedSearch,
+          status: filter,
+          dateFilter: dateFilter,
+          page: page,
+          limit: 10
+        }
+      });
+      setInvoices(res.data.invoices);
+      setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
       console.error('Error fetching invoices', err);
     } finally {
@@ -82,24 +109,7 @@ const Invoices = () => {
     }
   };
 
-  const filteredInvoices = invoices.filter(inv => {
-    const matchesSearch = inv.invoice_number.toLowerCase().includes(search.toLowerCase()) || 
-                         inv.customer_name.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = filter === 'all' || inv.status === filter;
-    
-    let matchesDate = true;
-    if (dateFilter === '30days') {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      matchesDate = new Date(inv.date) >= thirtyDaysAgo;
-    } else if (dateFilter === '90days') {
-      const ninetyDaysAgo = new Date();
-      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-      matchesDate = new Date(inv.date) >= ninetyDaysAgo;
-    }
 
-    return matchesSearch && matchesStatus && matchesDate;
-  });
 
   const handleDownload = async (id, number) => {
     try {
@@ -224,7 +234,7 @@ const Invoices = () => {
                   <td colSpan="6" className="px-6 py-4"><div className="h-4 bg-gray-100 rounded w-full"></div></td>
                 </tr>
               ))
-            ) : filteredInvoices.length > 0 ? filteredInvoices.map((inv) => (
+            ) : invoices.length > 0 ? invoices.map((inv) => (
               <tr key={inv.id} className="hover:bg-gray-50/50 transition-colors">
                 <td className="px-6 py-4">
                   <p className="text-sm font-bold text-gray-900 mb-0.5">{inv.invoice_number}</p>
@@ -277,6 +287,29 @@ const Invoices = () => {
             )}
           </tbody>
         </table>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
+            <span className="text-sm text-gray-500 font-medium">Page {page} of {totalPages}</span>
+            <div className="flex items-center gap-2">
+              <button 
+                disabled={page === 1}
+                onClick={() => setPage(p => p - 1)}
+                className="px-4 py-2 text-sm font-bold text-gray-700 bg-white border border-gray-200 rounded-xl disabled:opacity-50 hover:bg-gray-50 transition-colors"
+              >
+                Previous
+              </button>
+              <button 
+                disabled={page === totalPages}
+                onClick={() => setPage(p => p + 1)}
+                className="px-4 py-2 text-sm font-bold text-gray-700 bg-white border border-gray-200 rounded-xl disabled:opacity-50 hover:bg-gray-50 transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       
     </Layout>

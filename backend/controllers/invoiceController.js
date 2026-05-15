@@ -79,35 +79,63 @@ exports.create = async (req, res) => {
 // Get All Invoices
 exports.getAll = async (req, res) => {
   const organizationId = req.organizationId;
-  const { status, customer_id } = req.query;
+  const { status, customer_id, search, dateFilter, page = 1, limit = 10 } = req.query;
 
   try {
-    let query = `
-      SELECT i.*, c.name as customer_name 
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+    const offset = (pageNum - 1) * limitNum;
+
+    let baseQuery = `
       FROM invoices i 
       JOIN customers c ON i.customer_id = c.id 
       WHERE i.organization_id = ?
     `;
     let params = [organizationId];
 
-    if (status) {
+    if (status && status !== 'all') {
       if (Array.isArray(status)) {
-        query += ` AND i.status IN (${status.map(() => '?').join(',')})`;
+        baseQuery += ` AND i.status IN (${status.map(() => '?').join(',')})`;
         params.push(...status);
       } else {
-        query += ' AND i.status = ?';
+        baseQuery += ' AND i.status = ?';
         params.push(status);
       }
     }
     if (customer_id) {
-      query += ' AND i.customer_id = ?';
+      baseQuery += ' AND i.customer_id = ?';
       params.push(customer_id);
     }
+    if (search) {
+      baseQuery += ' AND (i.invoice_number LIKE ? OR c.name LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`);
+    }
+    if (dateFilter) {
+      if (dateFilter === '30days') {
+        baseQuery += ' AND i.date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)';
+      } else if (dateFilter === '90days') {
+        baseQuery += ' AND i.date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)';
+      }
+    }
 
-    query += ' ORDER BY i.created_at DESC';
+    // 1. Get Total Count
+    const countQuery = `SELECT COUNT(*) as total ${baseQuery}`;
+    const [countResult] = await db.execute(countQuery, params);
+    const total = countResult[0].total;
 
-    const [rows] = await db.execute(query, params);
-    res.json(rows);
+    // 2. Get Paginated Data
+    const dataQuery = `SELECT i.*, c.name as customer_name ${baseQuery} ORDER BY i.created_at DESC LIMIT ${limitNum} OFFSET ${offset}`;
+    const [rows] = await db.execute(dataQuery, params);
+
+    res.json({
+      invoices: rows,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error fetching invoices' });
