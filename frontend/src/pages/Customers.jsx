@@ -15,7 +15,9 @@ import {
   User,
   MoreVertical,
   X,
-  Loader2
+  Loader2,
+  Paperclip,
+  Download
 } from 'lucide-react';
 
 const Customers = () => {
@@ -26,6 +28,7 @@ const Customers = () => {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
+  const [attachments, setAttachments] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -59,11 +62,49 @@ const Customers = () => {
         address: customer.address || '',
         tax_id: customer.tax_id || ''
       });
+      fetchAttachments(customer.id);
     } else {
       setEditingCustomer(null);
+      setAttachments([]);
       setFormData({ name: '', email: '', phone: '', address: '', tax_id: '' });
     }
     setShowModal(true);
+  };
+
+  const fetchAttachments = async (id) => {
+    try {
+      const res = await api.get(`/customers/${id}/attachments`);
+      setAttachments(res.data);
+    } catch (err) {
+      console.error('Error fetching attachments', err);
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    if (!e.target.files || !e.target.files[0] || !editingCustomer) return;
+    const file = e.target.files[0];
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+    
+    try {
+      await api.post(`/customers/${editingCustomer.id}/attachments`, uploadData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      fetchAttachments(editingCustomer.id);
+    } catch (err) {
+      console.error('Error uploading file', err);
+      alert('Error uploading file');
+    }
+  };
+
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (!window.confirm('Delete this attachment?')) return;
+    try {
+      await api.delete(`/customers/${editingCustomer.id}/attachments/${attachmentId}`);
+      fetchAttachments(editingCustomer.id);
+    } catch (err) {
+      console.error('Error deleting attachment', err);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -250,6 +291,44 @@ const Customers = () => {
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
                 ></textarea>
               </div>
+
+              {editingCustomer && (
+                <div className="pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-sm font-medium text-gray-700">Attachments</label>
+                    <label className="cursor-pointer text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center">
+                      <Paperclip size={16} className="mr-1" />
+                      Upload File
+                      <input type="file" className="hidden" onChange={handleFileUpload} />
+                    </label>
+                  </div>
+                  
+                  {attachments.length > 0 ? (
+                    <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
+                      {attachments.map(att => (
+                        <div key={att.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border border-gray-100">
+                          <div className="flex items-center overflow-hidden">
+                            <Paperclip size={14} className="text-gray-400 mr-2 flex-shrink-0" />
+                            <span className="text-sm text-gray-700 truncate">{att.file_name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <a href={`http://localhost:5000${att.file_url}`} target="_blank" rel="noopener noreferrer" className="p-1.5 text-gray-400 hover:text-primary-600 rounded-md">
+                              <Download size={14} />
+                            </a>
+                            <button type="button" onClick={() => handleDeleteAttachment(att.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded-md">
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-400 italic text-center p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                      No attachments yet.
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="flex gap-4 pt-4">
                 <button

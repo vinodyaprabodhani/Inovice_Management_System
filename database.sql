@@ -49,6 +49,16 @@ CREATE TABLE IF NOT EXISTS `customers` (
     FOREIGN KEY (`organization_id`) REFERENCES `organizations`(`id`) ON DELETE CASCADE
 );
 
+-- 3.5 Customer Attachments Table
+CREATE TABLE IF NOT EXISTS `customer_attachments` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `customer_id` INT NOT NULL,
+    `file_name` VARCHAR(255) NOT NULL,
+    `file_url` VARCHAR(255) NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE CASCADE
+);
+
 -- 4. Products Table
 CREATE TABLE IF NOT EXISTS `products` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -78,6 +88,7 @@ CREATE TABLE IF NOT EXISTS `invoices` (
     `total` DECIMAL(15, 2) DEFAULT 0.00,
     `notes` TEXT,
     `client_token` VARCHAR(100) UNIQUE, -- For public client portal link
+    `pdf_url` VARCHAR(255) DEFAULT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (`organization_id`) REFERENCES `organizations`(`id`) ON DELETE CASCADE,

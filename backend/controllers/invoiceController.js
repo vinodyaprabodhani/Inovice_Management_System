@@ -245,6 +245,7 @@ exports.delete = async (req, res) => {
 // Generate PDF (Utility)
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
+const path = require('path');
 
 exports.generatePDF = async (req, res) => {
   const { id } = req.params;
@@ -266,12 +267,22 @@ exports.generatePDF = async (req, res) => {
     const [items] = await db.execute('SELECT * FROM invoice_items WHERE invoice_id = ?', [id]);
 
     const doc = new PDFDocument({ margins: { top: 50, left: 50, right: 50, bottom: 0 }, size: 'A4' });
-    let filename = `invoice_${invoice.invoice_number}.pdf`;
+    let filename = `invoice_${invoice.invoice_number}_${Date.now()}.pdf`;
+
+    const dir = path.join(__dirname, '../../uploads/invoices');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    const filePath = path.join(dir, filename);
+    const writeStream = fs.createWriteStream(filePath);
+    doc.pipe(writeStream);
 
     res.setHeader('Content-disposition', 'attachment; filename=' + filename);
     res.setHeader('Content-type', 'application/pdf');
 
     doc.pipe(res);
+
+    const pdfUrl = `/uploads/invoices/${filename}`;
+    db.execute('UPDATE invoices SET pdf_url = ? WHERE id = ?', [pdfUrl, id]).catch(err => console.error('Failed to save pdf_url', err));
 
     const themeColor = invoice.org_color_theme || '#3b82f6';
     
