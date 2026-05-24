@@ -30,6 +30,14 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Validate username for special characters
+    const hasSpecialChars = /[^a-zA-Z0-9\s_-]/.test(formData.name);
+    if (hasSpecialChars) {
+      setError('Invalid username.The username cannot contain special characters');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await api.post('/auth/register', { ...formData, organizationName: formData.name });

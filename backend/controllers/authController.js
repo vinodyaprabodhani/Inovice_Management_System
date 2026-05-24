@@ -8,6 +8,12 @@ require('dotenv').config();
 exports.register = async (req, res) => {
   const { name, email, password, organizationName } = req.body;
 
+  // Validate username for special characters
+  const hasSpecialChars = /[^a-zA-Z0-9\s_-]/.test(name);
+  if (hasSpecialChars) {
+    return res.status(400).json({ message: 'Invalid username.The username cannot contain special characters' });
+  }
+
   try {
     // 1. Check if user already exists
     const [existing] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
