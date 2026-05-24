@@ -1,17 +1,31 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
-import { User, Mail, Lock, Building, UserPlus, AlertCircle, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, Building, UserPlus, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
 
 const Register = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  const urlPlan = searchParams.get('plan');
+  const plan = location.state?.plan || urlPlan;
+  const paymentVerified = location.state?.paymentVerified;
+  const cardholderName = location.state?.cardholderName;
+
   const [formData, setFormData] = useState({
-    name: '',
+    name: cardholderName || '',
     email: '',
     password: ''
   });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (plan === 'professional' && !paymentVerified) {
+      navigate('/checkout?plan=professional');
+    }
+  }, [plan, paymentVerified, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,6 +53,12 @@ const Register = () => {
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Get Started</h1>
           <p className="text-gray-500 mt-2">Create your organization account in seconds.</p>
+          {plan === 'professional' && paymentVerified && (
+            <div className="mt-4 px-4 py-3 bg-green-50 border border-green-200 rounded-2xl flex items-center justify-center gap-2 text-green-700 text-xs font-black uppercase tracking-wider shadow-sm animate-in zoom-in duration-200">
+              <CheckCircle2 size={16} />
+              Professional Plan - Payment Verified
+            </div>
+          )}
         </div>
 
         {error && (
@@ -98,10 +118,10 @@ const Register = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-semibold shadow-lg shadow-primary-200 transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-70"
+            className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-semibold shadow-lg shadow-primary-200 transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-70 cursor-pointer"
           >
             {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <UserPlus size={20} />}
-            {isSubmitting ? 'Creating Account...' : 'Register Organization'}
+            {isSubmitting ? 'Creating Account...' : (plan === 'professional' ? 'Complete Purchase & Register' : 'Register Organization')}
           </button>
         </form>
 

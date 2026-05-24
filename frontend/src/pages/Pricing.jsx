@@ -24,7 +24,7 @@ const Pricing = () => {
       color: 'bg-primary-50',
       popular: true,
       cta: 'Get Started',
-      link: '/register'
+      link: '/checkout?plan=professional'
     },
     {
       name: 'Enterprise',
