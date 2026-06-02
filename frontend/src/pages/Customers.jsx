@@ -113,9 +113,9 @@ const Customers = () => {
     e.preventDefault();
     setPhoneError('');
 
-    // Check if phone number has letters/alphabet characters
-    if (formData.phone && /[a-zA-Z]/.test(formData.phone)) {
-      setPhoneError('This field should include numbers only');
+    // Check if phone number has exactly 10 digits (numbers only, no symbols or letters)
+    if (formData.phone && !/^\d{10}$/.test(formData.phone)) {
+      setPhoneError('This field should include 10 numbers only');
       return;
     }
 
