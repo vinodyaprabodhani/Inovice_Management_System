@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './Sidebar';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { Bell, Search, Mail, HelpCircle } from 'lucide-react';
+import { Bell, Search, Mail, HelpCircle, ArrowRight, Loader2 } from 'lucide-react';
+import api from '../api/axios';
 
 const Layout = ({ children, title }) => {
   const { user } = useAuth();
@@ -12,6 +13,30 @@ const Layout = ({ children, title }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const delayDebounceFn = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const res = await api.get('/invoices', {
+          params: { search: searchQuery }
+        });
+        setSearchResults(res.data.invoices || []);
+      } catch (err) {
+        console.error('Error searching invoices', err);
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -57,14 +82,49 @@ const Layout = ({ children, title }) => {
               </div>
 
               {isSearchFocused && searchQuery.length > 0 && (
-                <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
-                  <div className="p-3 border-b border-gray-100 bg-gray-50/50">
-                    <p className="text-xs font-medium text-gray-500">Search Results</p>
+                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                  <div className="p-3 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Search Results</p>
+                    {searching && <Loader2 size={12} className="animate-spin text-gray-400" />}
                   </div>
-                  <div className="p-4 flex flex-col items-center justify-center text-center space-y-2 min-h-[100px]">
-                    <Search size={24} className="text-gray-300" />
-                    <p className="text-sm text-gray-500">No results found for "{searchQuery}"</p>
+                  <div className="max-h-60 overflow-y-auto">
+                    {searching && searchResults.length === 0 ? (
+                      <div className="p-4 text-center text-sm text-gray-500">Searching...</div>
+                    ) : searchResults.length > 0 ? (
+                      searchResults.map((inv) => (
+                        <Link
+                          key={inv.id}
+                          to={`/invoices/edit/${inv.id}`}
+                          onMouseDown={() => setSearchQuery('')}
+                          className="flex flex-col px-4 py-2.5 hover:bg-gray-50 border-b border-gray-50 last:border-b-0 cursor-pointer block"
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-semibold text-gray-900">{inv.invoice_number}</span>
+                            <span className="text-sm font-bold text-primary-600">${Number(inv.total || 0).toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between items-center mt-0.5">
+                            <span className="text-xs text-gray-500">{inv.customer_name}</span>
+                            <span className="text-[10px] uppercase font-bold text-gray-400">{inv.status}</span>
+                          </div>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="p-4 flex flex-col items-center justify-center text-center space-y-2 min-h-[100px]">
+                        <Search size={24} className="text-gray-300" />
+                        <p className="text-sm text-gray-500">No results found for "{searchQuery}"</p>
+                      </div>
+                    )}
                   </div>
+                  {searchResults.length > 0 && (
+                    <Link
+                      to={`/invoices?search=${encodeURIComponent(searchQuery)}`}
+                      onMouseDown={() => setSearchQuery('')}
+                      className="flex items-center justify-between px-4 py-3 bg-primary-50/50 hover:bg-primary-50 text-xs font-bold text-primary-600 text-center border-t border-gray-100"
+                    >
+                      <span>View all invoice matches</span>
+                      <ArrowRight size={14} />
+                    </Link>
+                  )}
                 </div>
               )}
             </div>

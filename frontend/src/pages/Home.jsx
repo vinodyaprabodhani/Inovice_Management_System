@@ -18,28 +18,28 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative pt-16 pb-24 lg:pt-32 lg:pb-40 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-4xl mx-auto mb-16">
-            <h1 className="text-4xl lg:text-6xl font-black text-gray-900 tracking-tight leading-[1.1] mb-8 animate-in fade-in slide-in-from-bottom duration-700">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h1 className="text-3xl lg:text-5xl font-extrabold text-gray-900 tracking-tight leading-[1.15] mb-6 animate-in fade-in slide-in-from-bottom duration-700">
               Invoicing that <span className="text-primary-600">moves as fast</span> as your business.
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed mb-10 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom duration-1000">
+            <p className="text-base text-gray-500 leading-relaxed mb-8 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom duration-1000">
               The only platform that combines professional PDF invoicing with real-time WhatsApp alerts and powerful revenue analytics. Built for modern teams.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
-              <Link to="/register" className="w-full sm:w-auto px-8 py-4 bg-primary-600 text-white font-black rounded-2xl shadow-xl shadow-primary-200 hover:bg-primary-700 hover:-translate-y-1 transition-all text-base flex items-center justify-center gap-2">
+              <Link to="/register" className="w-full sm:w-auto px-6 py-3 bg-primary-600 text-white font-bold rounded-xl shadow-lg shadow-primary-200 hover:bg-primary-700 hover:-translate-y-0.5 transition-all text-sm flex items-center justify-center gap-2">
                 Start 14-day Free Trial
-                <ArrowRight size={20} />
+                <ArrowRight size={16} />
               </Link>
-              <Link to="/features" className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 font-bold rounded-2xl border border-gray-200 hover:bg-gray-50 transition-all text-base">
+              <Link to="/features" className="w-full sm:w-auto px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl border border-gray-200 hover:bg-gray-50 hover:-translate-y-0.5 transition-all text-sm">
                 View Features
               </Link>
             </div>
           </div>
 
           {/* Product Preview Mockup */}
-          <div className="relative max-w-5xl mx-auto animate-in fade-in zoom-in duration-1000 delay-300">
+          <div className="relative max-w-3xl mx-auto animate-in fade-in zoom-in duration-1000 delay-300">
             <div className="absolute inset-0 bg-primary-600/5 blur-3xl rounded-full -z-10 transform scale-110"></div>
-            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-4 relative">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-3 relative">
                <div className="bg-gray-50 rounded-2xl overflow-hidden border border-gray-200 aspect-[16/9] flex items-center justify-center relative group">
                   <div className="absolute inset-0 bg-gradient-to-tr from-gray-900/5 to-transparent"></div>
                   <img 
@@ -79,11 +79,11 @@ const Home = () => {
       {/* Main Features Grid */}
       <section className="py-24 lg:py-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-20">
-            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 tracking-tight leading-tight mb-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight mb-4">
               Everything you need to <span className="text-primary-600">scale your revenue</span>.
             </h2>
-            <p className="text-lg text-gray-500">
+            <p className="text-base text-gray-500">
               We've replaced the clutter of traditional tools with a streamlined experience designed for growth-oriented companies.
             </p>
           </div>
@@ -127,11 +127,11 @@ const Home = () => {
                 bg: 'bg-teal-50'
               }
             ].map((f, i) => (
-              <div key={i} className="group p-8 bg-white border border-gray-100 rounded-3xl hover:border-primary-100 hover:shadow-xl hover:shadow-primary-50 transition-all duration-300">
-                <div className={`w-14 h-14 ${f.bg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                  {React.cloneElement(f.icon, { size: 28 })}
+              <div key={i} className="group p-6 bg-white border border-gray-100 rounded-2xl hover:border-primary-100 hover:shadow-xl hover:shadow-primary-50 transition-all duration-300">
+                <div className={`w-12 h-12 ${f.bg} rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
+                  {React.cloneElement(f.icon, { size: 24 })}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{f.title}</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{f.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
@@ -140,20 +140,20 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gray-900 rounded-[3rem] p-12 lg:p-24 text-center relative overflow-hidden">
+      <section className="py-16">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gray-900 rounded-[2rem] p-8 lg:p-16 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-primary-600/10 blur-3xl rounded-full translate-y-1/2"></div>
-            <div className="relative z-10 max-w-3xl mx-auto">
-              <h2 className="text-4xl lg:text-5xl font-black text-white mb-8">Ready to automate your billing?</h2>
-              <p className="text-lg text-gray-400 mb-12">
+            <div className="relative z-10 max-w-2xl mx-auto">
+              <h2 className="text-3xl lg:text-4xl font-extrabold text-white mb-6">Ready to automate your billing?</h2>
+              <p className="text-base text-gray-400 mb-8">
                 Join thousands of businesses who have switched to a faster, more modern way of managing their finances.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                 <Link to="/register" className="w-full sm:w-auto px-10 py-5 bg-primary-600 text-white font-black rounded-2xl shadow-xl shadow-primary-900/40 hover:bg-primary-700 hover:-translate-y-1 transition-all text-lg">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                 <Link to="/register" className="w-full sm:w-auto px-8 py-3.5 bg-primary-600 text-white font-bold rounded-xl shadow-lg shadow-primary-900/40 hover:bg-primary-700 hover:-translate-y-0.5 transition-all text-sm">
                     Get Started Free
                  </Link>
-                 <Link to="/contact" className="w-full sm:w-auto px-10 py-5 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 backdrop-blur-md transition-all text-lg border border-white/10">
+                 <Link to="/contact" className="w-full sm:w-auto px-8 py-3.5 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 backdrop-blur-md transition-all text-sm border border-white/10">
                     Contact Sales
                  </Link>
               </div>

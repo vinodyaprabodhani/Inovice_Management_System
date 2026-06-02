@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, LogIn, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, LogIn, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -26,7 +26,16 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 relative">
+      {/* Back to Home Button */}
+      <Link 
+        to="/" 
+        className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-900 text-sm font-semibold rounded-xl border border-gray-200/60 shadow-sm transition-all hover:shadow-md z-20"
+      >
+        <ArrowLeft size={16} />
+        <span>Back to Home</span>
+      </Link>
+
       {/* Abstract Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary-200/50 rounded-full blur-3xl -mr-48 -mt-24"></div>
@@ -109,7 +118,7 @@ const Login = () => {
                 className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-semibold shadow-lg shadow-primary-200 transition-all flex items-center justify-center gap-2 group disabled:opacity-70"
               >
                 {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <LogIn size={20} />}
-                {isSubmitting ? 'Signing in...' : 'Sign In'}
+                {isSubmitting ? 'Logging in...' : 'Login'}
               </button>
             </form>
 

@@ -43,7 +43,7 @@ const LandingLayout = ({ children }) => {
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center gap-4">
               <Link to="/login" className="px-5 py-2.5 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors">
-                Sign In
+                Login
               </Link>
               <Link 
                 to="/register" 

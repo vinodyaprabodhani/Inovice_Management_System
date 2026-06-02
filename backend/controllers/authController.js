@@ -14,6 +14,14 @@ exports.register = async (req, res) => {
     return res.status(400).json({ message: 'Invalid username.The username cannot contain special characters' });
   }
 
+  // Validate password complexity
+  const pwHasLetter = /[a-zA-Z]/.test(password);
+  const pwHasNumber = /[0-9]/.test(password);
+  const pwHasSymbol = /[^a-zA-Z0-9]/.test(password);
+  if (!pwHasLetter || !pwHasNumber || !pwHasSymbol) {
+    return res.status(400).json({ message: 'Password must contain a mix of letters, numbers, and symbols.' });
+  }
+
   try {
     // 1. Check if user already exists
     const [existing] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);

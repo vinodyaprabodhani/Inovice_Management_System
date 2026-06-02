@@ -21,6 +21,12 @@ const Register = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Password complexity helpers
+  const pwHasLetter = /[a-zA-Z]/.test(formData.password);
+  const pwHasNumber = /[0-9]/.test(formData.password);
+  const pwHasSymbol = /[^a-zA-Z0-9]/.test(formData.password);
+  const isPasswordValid = pwHasLetter && pwHasNumber && pwHasSymbol;
+
   useEffect(() => {
     if (plan === 'professional' && !paymentVerified) {
       navigate('/checkout?plan=professional');
@@ -35,6 +41,12 @@ const Register = () => {
     const hasSpecialChars = /[^a-zA-Z0-9\s_-]/.test(formData.name);
     if (hasSpecialChars) {
       setError('Invalid username.The username cannot contain special characters');
+      return;
+    }
+
+    // Validate password complexity
+    if (!pwHasLetter || !pwHasNumber || !pwHasSymbol) {
+      setError('Password must contain a mix of letters, numbers, and symbols.');
       return;
     }
 
@@ -121,6 +133,21 @@ const Register = () => {
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
               />
             </div>
+            {formData.password && (
+              <div className="mt-2 animate-in fade-in duration-200">
+                {isPasswordValid ? (
+                  <div className="flex items-center gap-1.5 text-xs text-green-600 font-medium">
+                    <CheckCircle2 size={14} className="shrink-0" />
+                    <span>Password requirements met</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs text-red-600 font-medium">
+                    <AlertCircle size={14} className="shrink-0" />
+                    <span>Password must contain a mix of letters, numbers, and symbols.</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <button
