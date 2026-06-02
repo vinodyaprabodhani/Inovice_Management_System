@@ -29,6 +29,7 @@ const Customers = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [attachments, setAttachments] = useState([]);
+  const [phoneError, setPhoneError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -53,6 +54,7 @@ const Customers = () => {
   };
 
   const handleOpenModal = (customer = null) => {
+    setPhoneError('');
     if (customer) {
       setEditingCustomer(customer);
       setFormData({
@@ -109,6 +111,14 @@ const Customers = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setPhoneError('');
+
+    // Check if phone number has letters/alphabet characters
+    if (formData.phone && /[a-zA-Z]/.test(formData.phone)) {
+      setPhoneError('This field should include numbers only');
+      return;
+    }
+
     try {
       if (editingCustomer) {
         await api.put(`/customers/${editingCustomer.id}`, formData);
@@ -258,15 +268,23 @@ const Customers = () => {
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                   />
                 </div>
-                <div>
+                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
                   <input
                     type="text"
                     placeholder="+1 (555) 000-0000"
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all"
+                    className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all ${
+                      phoneError ? 'border-red-500 focus:ring-red-500' : 'border-gray-200'
+                    }`}
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) => {
+                      setFormData({...formData, phone: e.target.value});
+                      if (phoneError) setPhoneError('');
+                    }}
                   />
+                  {phoneError && (
+                    <p className="text-red-500 text-xs mt-1 font-medium">{phoneError}</p>
+                  )}
                 </div>
               </div>
 
