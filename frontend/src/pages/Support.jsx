@@ -194,7 +194,12 @@ const Support = () => {
               </div>
             </div>
             <button 
-              onClick={() => setIsChatOpen(false)}
+              onClick={() => {
+                setIsChatOpen(false);
+                setChatMessages([
+                  { sender: 'agent', text: 'Hi there! Welcome to InvoicePro support. How can I help you today?', time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }
+                ]);
+              }}
               className="text-white/80 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
             >
               <X size={18} />
