@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import { 
   Building, 
   Mail, 
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 
 const Settings = () => {
+  const { updateUser } = useAuth();
   const [org, setOrg] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -78,6 +80,7 @@ const Settings = () => {
       await api.put('/organization', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      updateUser({ organizationName: formData.name });
       setMessage('Settings updated successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
