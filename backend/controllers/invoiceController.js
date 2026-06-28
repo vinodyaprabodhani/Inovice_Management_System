@@ -291,15 +291,25 @@ exports.generatePDF = async (req, res) => {
 
     // Document Header
     let currentY = 50;
+    const initialY = 50;
+
+    // Organization Logo
+    if (invoice.org_logo) {
+      const logoPath = path.join(__dirname, '../../', invoice.org_logo);
+      if (fs.existsSync(logoPath)) {
+        doc.image(logoPath, 50, currentY, { height: 40 });
+        currentY += 50;
+      }
+    }
 
     // Organization Info (Left)
     doc.fillColor('#333333').fontSize(24).font('Helvetica-Bold').text(invoice.org_name || 'Company Name', 50, currentY);
     doc.fontSize(10).font('Helvetica').fillColor('#666666').text(invoice.org_address || '', 50, currentY + 30, { width: 250 });
 
     // Invoice Title & Details (Right)
-    doc.fillColor(themeColor).fontSize(28).font('Helvetica-Bold').text('INVOICE', 0, currentY, { align: 'right', width: doc.page.width - 50 });
+    doc.fillColor(themeColor).fontSize(28).font('Helvetica-Bold').text('INVOICE', 0, initialY, { align: 'right', width: doc.page.width - 50 });
     
-    const detailsY = currentY + 35;
+    const detailsY = initialY + 35;
     doc.fontSize(10).fillColor('#333333').font('Helvetica-Bold').text('Invoice #:', doc.page.width - 200, detailsY, { align: 'left', width: 70 });
     doc.font('Helvetica').text(invoice.invoice_number, doc.page.width - 130, detailsY, { align: 'right', width: 80 });
 
