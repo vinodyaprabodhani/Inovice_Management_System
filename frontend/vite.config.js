@@ -6,8 +6,4 @@ export default defineConfig({
   plugins: [
     react(),
   ],
-  optimizeDeps: {
-    noDiscovery: true,
-    include: [],
-  },
 })
