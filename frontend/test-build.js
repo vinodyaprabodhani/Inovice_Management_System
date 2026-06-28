@@ -4,7 +4,7 @@ async function run() {
   try {
     console.log('Starting rolldown build...');
     const build = await rolldown({
-      input: 'vite.config.js',
+      input: 'src/main.jsx',
     });
     const result = await build.generate();
     console.log('Build succeeded!');
