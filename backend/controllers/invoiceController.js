@@ -304,7 +304,9 @@ exports.generatePDF = async (req, res) => {
 
     // Organization Info (Left)
     doc.fillColor('#333333').fontSize(24).font('Helvetica-Bold').text(invoice.org_name || 'Company Name', 50, currentY);
-    doc.fontSize(10).font('Helvetica').fillColor('#666666').text(invoice.org_address || '', 50, currentY + 30, { width: 250 });
+    const addressY = doc.y + 5;
+    doc.fontSize(10).font('Helvetica').fillColor('#666666').text(invoice.org_address || '', 50, addressY, { width: 250 });
+    const afterAddressY = doc.y;
 
     // Invoice Title & Details (Right)
     doc.fillColor(themeColor).fontSize(28).font('Helvetica-Bold').text('INVOICE', 0, initialY, { align: 'right', width: doc.page.width - 50 });
@@ -320,7 +322,7 @@ exports.generatePDF = async (req, res) => {
     doc.font('Helvetica').text(invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : '', doc.page.width - 130, detailsY + 30, { align: 'right', width: 80 });
 
     // Bill To Section
-    currentY = 150;
+    currentY = Math.max(afterAddressY + 20, 150);
     
     doc.rect(50, currentY, 280, 90).fill('#f8fafc');
     doc.fillColor(themeColor).fontSize(12).font('Helvetica-Bold').text('BILL TO', 65, currentY + 15);
@@ -329,7 +331,7 @@ exports.generatePDF = async (req, res) => {
     doc.text(invoice.customer_address || '', 65, currentY + 65, { width: 250 });
 
     // Table Header
-    currentY = 270;
+    currentY = Math.max(currentY + 120, doc.y + 30);
     doc.rect(50, currentY, doc.page.width - 100, 25).fill(themeColor);
     
     const colX = { desc: 65, qty: 330, price: 400, total: 470 };
