@@ -16,6 +16,7 @@ import {
 
 const Expenses = () => {
   const [expenses, setExpenses] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -72,6 +73,11 @@ const Expenses = () => {
     }
   };
 
+  const filteredExpenses = expenses.filter(exp => 
+    exp.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    exp.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <Layout title="Expense Management">
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -80,6 +86,8 @@ const Expenses = () => {
           <input 
             type="text" 
             placeholder="Search expenses..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm"
           />
         </div>
@@ -96,7 +104,7 @@ const Expenses = () => {
       <div className="grid grid-cols-1 gap-4">
         {loading ? (
           [...Array(3)].map((_, i) => <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse"></div>)
-        ) : expenses.length > 0 ? expenses.map((exp) => (
+        ) : filteredExpenses.length > 0 ? filteredExpenses.map((exp) => (
           <div key={exp.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between hover:bg-gray-50/50 transition-colors group">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-red-50 text-red-500 flex items-center justify-center">

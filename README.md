@@ -63,7 +63,7 @@ A modern, professional, cloud-ready SaaS Invoice Management System designed for 
 
 ### 3. Frontend Installation
 
-1. Navigate to `/frontend`.
+1. Navigate to `/frontend`.![alt text](image.png)
 2. Install dependencies: `npm install`
 3. Start the application: `npm run dev`
 4. Access the app at `http://localhost:5173`.
