@@ -88,23 +88,30 @@ const Reports = () => {
           <p className="text-gray-500">Track your business performance and financial health.</p>
         </div>
         
-        <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
-          <input 
-            type="date" 
-            className="text-sm border-none focus:ring-0 px-2"
-            value={dateRange.startDate}
-            onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
-          />
-          <span className="text-gray-300">-</span>
-          <input 
-            type="date" 
-            className="text-sm border-none focus:ring-0 px-2"
-            value={dateRange.endDate}
-            onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
-          />
+        <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
+          <label className="flex items-center gap-2 px-2">
+            <span className="text-sm text-gray-500 font-medium">Start Date:</span>
+            <input 
+              type="date" 
+              className="text-sm border-none focus:ring-0 p-0 text-gray-700"
+              value={dateRange.startDate}
+              onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+            />
+          </label>
+          <span className="text-gray-200">|</span>
+          <label className="flex items-center gap-2 px-2">
+            <span className="text-sm text-gray-500 font-medium">End Date:</span>
+            <input 
+              type="date" 
+              className="text-sm border-none focus:ring-0 p-0 text-gray-700"
+              value={dateRange.endDate}
+              onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+            />
+          </label>
           <button 
             onClick={fetchReport}
-            className="bg-primary-600 text-white p-2 rounded-xl hover:bg-primary-700 transition-colors"
+            className="bg-primary-600 text-white p-2 rounded-xl hover:bg-primary-700 transition-colors ml-1"
+            title="Apply Filter"
           >
             <Calendar size={18} />
           </button>
