@@ -49,9 +49,9 @@ const Reports = () => {
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
 
   const pieData = [
-    { name: 'Received', value: reportData?.totalReceived || 0 },
-    { name: 'Pending', value: (reportData?.totalInvoiced || 0) - (reportData?.totalReceived || 0) },
-    { name: 'Expenses', value: reportData?.totalExpenses || 0 }
+    { name: 'Received', value: Number(reportData?.totalReceived || 0) },
+    { name: 'Pending', value: Number(reportData?.totalInvoiced || 0) - Number(reportData?.totalReceived || 0) },
+    { name: 'Expenses', value: Number(reportData?.totalExpenses || 0) }
   ];
 
   const exportToCSV = () => {
@@ -162,6 +162,7 @@ const Reports = () => {
                   innerRadius={80}
                   outerRadius={120}
                   paddingAngle={5}
+                  minAngle={15}
                   dataKey="value"
                 >
                   {pieData.map((entry, index) => (
