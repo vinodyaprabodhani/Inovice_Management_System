@@ -234,13 +234,6 @@ const Layout = ({ children, title }) => {
                           </span>
                         )}
                       </div>
-                      <Link 
-                        to="/support" 
-                        onClick={() => setActiveDropdown(null)} 
-                        className="text-xs font-bold text-primary-600 hover:text-primary-700 hover:underline flex items-center gap-1"
-                      >
-                        + New Message
-                      </Link>
                     </div>
 
                     {/* Tabs */}
