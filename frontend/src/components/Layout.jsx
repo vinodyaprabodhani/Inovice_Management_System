@@ -475,13 +475,6 @@ const Layout = ({ children, title }) => {
                           ) : (
                             <span className="text-gray-400">Updated just now</span>
                           )}
-                          <Link 
-                            to="/support" 
-                            onClick={() => setActiveDropdown(null)} 
-                            className="text-gray-600 hover:text-primary-600 flex items-center gap-1"
-                          >
-                            View in Support <ArrowRight size={12} />
-                          </Link>
                         </div>
                       </>
                     )}
