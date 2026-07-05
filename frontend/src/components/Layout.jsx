@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './Sidebar';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { Bell, Search, Mail, HelpCircle, ArrowRight, Loader2, Check, CheckCheck, Inbox, MessageSquare } from 'lucide-react';
+import { Bell, Search, Mail, HelpCircle, ArrowRight, Loader2, Check, CheckCheck, Inbox, MessageSquare, ArrowLeft, Send } from 'lucide-react';
 import api from '../api/axios';
 
 const defaultCustomerMessages = [
@@ -12,7 +12,8 @@ const defaultCustomerMessages = [
     email: 'sarah@acmecorp.com',
     text: 'Hi, can you please resend invoice #INV-1002 with the updated tax ID?',
     time: '10 mins ago',
-    isRead: false
+    isRead: false,
+    replies: []
   },
   {
     id: 2,
@@ -20,7 +21,8 @@ const defaultCustomerMessages = [
     email: 'alex@techstart.io',
     text: 'Payment of $1,250.00 for project milestone has been completed via Stripe.',
     time: '1 hour ago',
-    isRead: false
+    isRead: false,
+    replies: []
   },
   {
     id: 3,
@@ -28,7 +30,8 @@ const defaultCustomerMessages = [
     email: 'billing@globalsolutions.com',
     text: 'Thanks for the quick invoice update. Everything looks great!',
     time: 'Yesterday',
-    isRead: true
+    isRead: true,
+    replies: []
   }
 ];
 
@@ -49,6 +52,9 @@ const Layout = ({ children, title }) => {
   });
 
   const [messagesTab, setMessagesTab] = useState('unread');
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [replySuccessMessage, setReplySuccessMessage] = useState('');
 
   useEffect(() => {
     localStorage.setItem('invoice_customer_messages', JSON.stringify(customerMessages));
@@ -67,6 +73,45 @@ const Layout = ({ children, title }) => {
 
   const markAllAsRead = () => {
     setCustomerMessages(prev => prev.map(m => ({ ...m, isRead: true })));
+  };
+
+  const handleOpenMessage = (msg) => {
+    markAsRead(msg.id);
+    setSelectedMessage(msg);
+    setReplyText('');
+    setReplySuccessMessage('');
+  };
+
+  const handleSendReply = (e) => {
+    e.preventDefault();
+    if (!replyText.trim() || !selectedMessage) return;
+
+    const newReply = {
+      id: Date.now(),
+      text: replyText.trim(),
+      time: 'Just now',
+      sender: 'You'
+    };
+
+    const updated = customerMessages.map(m => {
+      if (m.id === selectedMessage.id) {
+        const existingReplies = m.replies || [];
+        return {
+          ...m,
+          replies: [...existingReplies, newReply]
+        };
+      }
+      return m;
+    });
+
+    setCustomerMessages(updated);
+    setSelectedMessage(prev => ({
+      ...prev,
+      replies: [...(prev.replies || []), newReply]
+    }));
+    setReplyText('');
+    setReplySuccessMessage('Reply sent successfully!');
+    setTimeout(() => setReplySuccessMessage(''), 3000);
   };
 
   useEffect(() => {
@@ -224,145 +269,222 @@ const Layout = ({ children, title }) => {
                 </button>
                 {activeDropdown === 'messages' && (
                   <div className="absolute right-0 mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150">
-                    {/* Header */}
-                    <div className="p-4 border-b border-gray-100 bg-gray-50/70 flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-gray-900 text-base">Customer Messages</h3>
-                        {unreadMessages.length > 0 && (
-                          <span className="px-2 py-0.5 bg-primary-100 text-primary-700 text-xs font-bold rounded-full">
-                            {unreadMessages.length} New
-                          </span>
-                        )}
+                    {selectedMessage ? (
+                      /* Conversation / Reply View */
+                      <div className="flex flex-col max-h-[480px]">
+                        {/* Header */}
+                        <div className="p-4 border-b border-gray-100 bg-gray-50/80 flex items-center justify-between">
+                          <button 
+                            onClick={() => setSelectedMessage(null)}
+                            className="flex items-center gap-1.5 text-xs font-bold text-primary-600 hover:text-primary-700 bg-primary-50 px-2.5 py-1.5 rounded-lg transition-colors"
+                          >
+                            <ArrowLeft size={14} /> Back
+                          </button>
+                          <div className="text-right truncate max-w-[200px]">
+                            <p className="text-xs font-bold text-gray-900 truncate">{selectedMessage.sender}</p>
+                            <p className="text-[10px] text-gray-400 truncate">{selectedMessage.email}</p>
+                          </div>
+                        </div>
+
+                        {/* Conversation Body */}
+                        <div className="p-4 flex-1 overflow-y-auto space-y-4 max-h-72 bg-gray-50/30">
+                          {/* Original Customer Message */}
+                          <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-2">
+                            <div className="flex justify-between items-center border-b border-gray-50 pb-2">
+                              <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                                <span className="w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-[10px]">
+                                  {selectedMessage.sender.charAt(0)}
+                                </span>
+                                {selectedMessage.sender}
+                              </span>
+                              <span className="text-[10px] text-gray-400">{selectedMessage.time}</span>
+                            </div>
+                            <p className="text-xs text-gray-700 leading-relaxed pt-1 whitespace-pre-wrap">{selectedMessage.text}</p>
+                          </div>
+
+                          {/* Replies Thread */}
+                          {selectedMessage.replies && selectedMessage.replies.map((reply) => (
+                            <div key={reply.id} className="flex flex-col items-end space-y-1">
+                              <div className="bg-primary-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] text-xs shadow-sm">
+                                <p className="leading-relaxed whitespace-pre-wrap">{reply.text}</p>
+                              </div>
+                              <span className="text-[10px] text-gray-400 px-1">{reply.time}</span>
+                            </div>
+                          ))}
+
+                          {replySuccessMessage && (
+                            <div className="p-2.5 bg-green-50 border border-green-200 text-green-700 text-xs font-bold rounded-xl text-center animate-in fade-in">
+                              {replySuccessMessage}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Reply Form */}
+                        <form onSubmit={handleSendReply} className="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
+                          <input 
+                            type="text" 
+                            required
+                            placeholder={`Reply to ${selectedMessage.sender.split(' ')[0]}...`}
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            className="flex-1 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-xs font-medium"
+                          />
+                          <button 
+                            type="submit"
+                            className="px-4 py-2.5 bg-primary-600 text-white rounded-xl text-xs font-bold hover:bg-primary-700 transition-colors flex items-center gap-1 shrink-0 shadow-md shadow-primary-200"
+                          >
+                            <Send size={13} /> Send
+                          </button>
+                        </form>
                       </div>
-                    </div>
-
-                    {/* Tabs */}
-                    <div className="flex border-b border-gray-100 bg-gray-50/40 text-xs font-bold">
-                      <button
-                        onClick={() => setMessagesTab('unread')}
-                        className={`flex-1 py-2.5 text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
-                          messagesTab === 'unread' 
-                            ? 'border-primary-600 text-primary-600 bg-white' 
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
-                        }`}
-                      >
-                        <span>New Messages</span>
-                        <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${messagesTab === 'unread' ? 'bg-primary-100 text-primary-700' : 'bg-gray-200 text-gray-600'}`}>
-                          {unreadMessages.length}
-                        </span>
-                      </button>
-                      <button
-                        onClick={() => setMessagesTab('read')}
-                        className={`flex-1 py-2.5 text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
-                          messagesTab === 'read' 
-                            ? 'border-primary-600 text-primary-600 bg-white' 
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
-                        }`}
-                      >
-                        <span>Read Messages</span>
-                        <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${messagesTab === 'read' ? 'bg-primary-100 text-primary-700' : 'bg-gray-200 text-gray-600'}`}>
-                          {readMessages.length}
-                        </span>
-                      </button>
-                    </div>
-
-                    {/* Message List */}
-                    <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
-                      {messagesTab === 'unread' ? (
-                        unreadMessages.length > 0 ? (
-                          unreadMessages.map((msg) => (
-                            <div 
-                              key={msg.id}
-                              className="p-3.5 hover:bg-primary-50/40 transition-colors flex items-start justify-between gap-3 group cursor-pointer"
-                              onClick={() => markAsRead(msg.id)}
-                            >
-                              <div className="w-9 h-9 rounded-full bg-primary-100 text-primary-700 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
-                                {msg.sender.charAt(0)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-baseline mb-1">
-                                  <p className="text-xs font-bold text-gray-900 truncate">{msg.sender}</p>
-                                  <span className="text-[10px] text-primary-600 font-semibold shrink-0 ml-2">{msg.time}</span>
-                                </div>
-                                <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">{msg.text}</p>
-                              </div>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  markAsRead(msg.id);
-                                }}
-                                className="p-1 text-gray-400 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors shrink-0"
-                                title="Mark as read"
-                              >
-                                <Check size={15} />
-                              </button>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="p-8 text-center flex flex-col items-center justify-center space-y-2">
-                            <div className="w-12 h-12 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-1">
-                              <CheckCheck size={24} />
-                            </div>
-                            <p className="text-sm font-bold text-gray-800">All caught up!</p>
-                            <p className="text-xs text-gray-400">No new unread messages. Check "Read Messages" to view history.</p>
+                    ) : (
+                      /* Message List View */
+                      <>
+                        {/* Header */}
+                        <div className="p-4 border-b border-gray-100 bg-gray-50/70 flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-gray-900 text-base">Customer Messages</h3>
+                            {unreadMessages.length > 0 && (
+                              <span className="px-2 py-0.5 bg-primary-100 text-primary-700 text-xs font-bold rounded-full">
+                                {unreadMessages.length} New
+                              </span>
+                            )}
                           </div>
-                        )
-                      ) : (
-                        readMessages.length > 0 ? (
-                          readMessages.map((msg) => (
-                            <div 
-                              key={msg.id}
-                              className="p-3.5 bg-gray-50/50 hover:bg-gray-100/50 transition-colors flex items-start justify-between gap-3 group"
-                            >
-                              <div className="w-9 h-9 rounded-full bg-gray-200 text-gray-600 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
-                                {msg.sender.charAt(0)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-baseline mb-1">
-                                  <p className="text-xs font-medium text-gray-800 truncate">{msg.sender}</p>
-                                  <span className="text-[10px] text-gray-400 shrink-0 ml-2">{msg.time}</span>
-                                </div>
-                                <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{msg.text}</p>
-                              </div>
-                              <button
-                                onClick={() => markAsUnread(msg.id)}
-                                className="p-1 text-gray-400 hover:text-primary-600 rounded-lg transition-colors shrink-0 text-[10px] font-bold"
-                                title="Mark as unread"
-                              >
-                                Unread
-                              </button>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="p-8 text-center flex flex-col items-center justify-center space-y-2">
-                            <Inbox size={28} className="text-gray-300 mb-1" />
-                            <p className="text-sm font-semibold text-gray-600">No read messages</p>
-                            <p className="text-xs text-gray-400">Read messages will be archived here.</p>
-                          </div>
-                        )
-                      )}
-                    </div>
+                        </div>
 
-                    {/* Footer */}
-                    <div className="p-3 bg-gray-50/80 border-t border-gray-100 flex justify-between items-center text-xs font-semibold">
-                      {unreadMessages.length > 0 ? (
-                        <button 
-                          onClick={markAllAsRead}
-                          className="text-primary-600 hover:underline cursor-pointer"
-                        >
-                          Mark all as read
-                        </button>
-                      ) : (
-                        <span className="text-gray-400">Updated just now</span>
-                      )}
-                      <Link 
-                        to="/support" 
-                        onClick={() => setActiveDropdown(null)} 
-                        className="text-gray-600 hover:text-primary-600 flex items-center gap-1"
-                      >
-                        View in Support <ArrowRight size={12} />
-                      </Link>
-                    </div>
+                        {/* Tabs */}
+                        <div className="flex border-b border-gray-100 bg-gray-50/40 text-xs font-bold">
+                          <button
+                            onClick={() => setMessagesTab('unread')}
+                            className={`flex-1 py-2.5 text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+                              messagesTab === 'unread' 
+                                ? 'border-primary-600 text-primary-600 bg-white' 
+                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                            }`}
+                          >
+                            <span>New Messages</span>
+                            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${messagesTab === 'unread' ? 'bg-primary-100 text-primary-700' : 'bg-gray-200 text-gray-600'}`}>
+                              {unreadMessages.length}
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => setMessagesTab('read')}
+                            className={`flex-1 py-2.5 text-center border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+                              messagesTab === 'read' 
+                                ? 'border-primary-600 text-primary-600 bg-white' 
+                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                            }`}
+                          >
+                            <span>Read Messages</span>
+                            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${messagesTab === 'read' ? 'bg-primary-100 text-primary-700' : 'bg-gray-200 text-gray-600'}`}>
+                              {readMessages.length}
+                            </span>
+                          </button>
+                        </div>
+
+                        {/* Message List */}
+                        <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
+                          {messagesTab === 'unread' ? (
+                            unreadMessages.length > 0 ? (
+                              unreadMessages.map((msg) => (
+                                <div 
+                                  key={msg.id}
+                                  className="p-3.5 hover:bg-primary-50/40 transition-colors flex items-start justify-between gap-3 group cursor-pointer"
+                                  onClick={() => handleOpenMessage(msg)}
+                                >
+                                  <div className="w-9 h-9 rounded-full bg-primary-100 text-primary-700 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
+                                    {msg.sender.charAt(0)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-baseline mb-1">
+                                      <p className="text-xs font-bold text-gray-900 truncate">{msg.sender}</p>
+                                      <span className="text-[10px] text-primary-600 font-semibold shrink-0 ml-2">{msg.time}</span>
+                                    </div>
+                                    <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">{msg.text}</p>
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      markAsRead(msg.id);
+                                    }}
+                                    className="p-1 text-gray-400 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors shrink-0"
+                                    title="Mark as read"
+                                  >
+                                    <Check size={15} />
+                                  </button>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="p-8 text-center flex flex-col items-center justify-center space-y-2">
+                                <div className="w-12 h-12 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-1">
+                                  <CheckCheck size={24} />
+                                </div>
+                                <p className="text-sm font-bold text-gray-800">All caught up!</p>
+                                <p className="text-xs text-gray-400">No new unread messages. Check "Read Messages" to view history.</p>
+                              </div>
+                            )
+                          ) : (
+                            readMessages.length > 0 ? (
+                              readMessages.map((msg) => (
+                                <div 
+                                  key={msg.id}
+                                  className="p-3.5 bg-gray-50/50 hover:bg-gray-100/50 transition-colors flex items-start justify-between gap-3 group cursor-pointer"
+                                  onClick={() => handleOpenMessage(msg)}
+                                >
+                                  <div className="w-9 h-9 rounded-full bg-gray-200 text-gray-600 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
+                                    {msg.sender.charAt(0)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-baseline mb-1">
+                                      <p className="text-xs font-medium text-gray-800 truncate">{msg.sender}</p>
+                                      <span className="text-[10px] text-gray-400 shrink-0 ml-2">{msg.time}</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{msg.text}</p>
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      markAsUnread(msg.id);
+                                    }}
+                                    className="p-1 text-gray-400 hover:text-primary-600 rounded-lg transition-colors shrink-0 text-[10px] font-bold"
+                                    title="Mark as unread"
+                                  >
+                                    Unread
+                                  </button>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="p-8 text-center flex flex-col items-center justify-center space-y-2">
+                                <Inbox size={28} className="text-gray-300 mb-1" />
+                                <p className="text-sm font-semibold text-gray-600">No read messages</p>
+                                <p className="text-xs text-gray-400">Read messages will be archived here.</p>
+                              </div>
+                            )
+                          )}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-3 bg-gray-50/80 border-t border-gray-100 flex justify-between items-center text-xs font-semibold">
+                          {unreadMessages.length > 0 ? (
+                            <button 
+                              onClick={markAllAsRead}
+                              className="text-primary-600 hover:underline cursor-pointer"
+                            >
+                              Mark all as read
+                            </button>
+                          ) : (
+                            <span className="text-gray-400">Updated just now</span>
+                          )}
+                          <Link 
+                            to="/support" 
+                            onClick={() => setActiveDropdown(null)} 
+                            className="text-gray-600 hover:text-primary-600 flex items-center gap-1"
+                          >
+                            View in Support <ArrowRight size={12} />
+                          </Link>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
