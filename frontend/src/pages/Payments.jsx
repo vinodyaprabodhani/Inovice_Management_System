@@ -38,10 +38,11 @@ const Payments = () => {
   const fetchData = async () => {
     try {
       const res = await api.get('/payments/all');
-      setPayments(res.data);
+      setPayments(Array.isArray(res.data) ? res.data : []);
       
-      const invRes = await api.get('/invoices?status=sent&status=partially_paid');
-      setInvoices(invRes.data);
+      const invRes = await api.get('/invoices?limit=1000');
+      const invoiceList = Array.isArray(invRes.data) ? invRes.data : (invRes.data?.invoices || []);
+      setInvoices(invoiceList);
     } catch (err) {
       console.error('Error fetching payments', err);
     } finally {
@@ -49,7 +50,7 @@ const Payments = () => {
     }
   };
 
-  const filteredPayments = payments.filter(p => {
+  const filteredPayments = (Array.isArray(payments) ? payments : []).filter(p => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return true;
     const transactionId = (p.transaction_id || `TRX-${p.id}`).toLowerCase();
@@ -101,9 +102,10 @@ const Payments = () => {
       return;
     }
     
-    const inv = invoices.find(i => i.id === parseInt(invId));
+    const invoiceArray = Array.isArray(invoices) ? invoices : [];
+    const inv = invoiceArray.find(i => i.id === parseInt(invId));
     if (inv) {
-      const paid = payments
+      const paid = (Array.isArray(payments) ? payments : [])
         .filter(p => p.invoice_id === parseInt(invId))
         .reduce((sum, p) => sum + parseFloat(p.amount), 0);
       
@@ -121,9 +123,10 @@ const Payments = () => {
 
   const getSelectedInvoiceDetails = () => {
     if (!formData.invoice_id) return null;
-    const inv = invoices.find(i => i.id === parseInt(formData.invoice_id));
+    const invoiceArray = Array.isArray(invoices) ? invoices : [];
+    const inv = invoiceArray.find(i => i.id === parseInt(formData.invoice_id));
     if (!inv) return null;
-    const paid = payments
+    const paid = (Array.isArray(payments) ? payments : [])
         .filter(p => p.invoice_id === parseInt(formData.invoice_id))
         .reduce((sum, p) => sum + parseFloat(p.amount), 0);
     const remaining = parseFloat(inv.total) - paid;
@@ -255,9 +258,9 @@ const Payments = () => {
                   onChange={handleInvoiceChange}
                 >
                   <option value="">Choose an invoice...</option>
-                  {invoices.map(inv => (
+                  {(Array.isArray(invoices) ? invoices : []).map(inv => (
                     <option key={inv.id} value={inv.id}>
-                      {inv.invoice_number} - {inv.customer_name}
+                      {inv.invoice_number} - {inv.customer_name} (${parseFloat(inv.total || 0).toFixed(2)})
                     </option>
                   ))}
                 </select>
