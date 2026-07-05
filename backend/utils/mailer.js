@@ -400,3 +400,29 @@ exports.sendLoginEmail = async (to, name, orgName) => {
     return false;
   }
 };
+
+exports.sendCustomEmail = async (to, subject, bodyContent) => {
+  const mailOptions = {
+    from: process.env.FROM_EMAIL || '"InvoicePro System" <noreply@invoicems.com>',
+    to: to,
+    subject: subject || 'New Message from InvoicePro',
+    html: generateEmailTemplate(
+      subject || 'New Message',
+      `
+      <div class="greeting">Hello,</div>
+      <p style="white-space: pre-line;">${bodyContent}</p>
+      `,
+      subject || 'New Message'
+    )
+  };
+
+  try {
+    const t = await getTransporter();
+    const info = await t.sendMail(mailOptions);
+    console.log(`Custom email sent to ${to}`);
+    return true;
+  } catch (err) {
+    console.error('Error sending custom email:', err);
+    return false;
+  }
+};

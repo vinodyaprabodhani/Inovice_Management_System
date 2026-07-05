@@ -89,9 +89,7 @@ const Customers = () => {
     uploadData.append('file', file);
     
     try {
-      await api.post(`/customers/${editingCustomer.id}/attachments`, uploadData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.post(`/customers/${editingCustomer.id}/attachments`, uploadData);
       fetchAttachments(editingCustomer.id);
     } catch (err) {
       console.error('Error uploading file', err);

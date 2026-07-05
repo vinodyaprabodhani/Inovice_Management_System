@@ -309,3 +309,45 @@ exports.dispatchInvoiceNotifications = async (invoiceId, orgId) => {
     console.error('Error in dispatchInvoiceNotifications utility:', err);
   }
 };
+
+// Send Custom Message
+exports.sendCustomMessage = async (req, res) => {
+  const { recipient, subject, message, type } = req.body;
+  const orgId = req.organizationId;
+
+  if (!recipient || !message) {
+    return res.status(400).json({ message: 'Recipient and message content are required.' });
+  }
+
+  try {
+    const messageType = type || (recipient.includes('@') ? 'Email' : 'Message');
+    const [result] = await db.execute(
+      'INSERT INTO notifications (organization_id, type, recipient, status) VALUES (?, ?, ?, ?)',
+      [orgId, messageType, recipient, 'Sent']
+    );
+
+    if (recipient.includes('@')) {
+      const { sendCustomEmail } = require('../utils/mailer');
+      await sendCustomEmail(recipient, subject, message);
+    }
+
+    res.status(201).json({ message: 'Message sent successfully!', id: result.insertId });
+  } catch (err) {
+    console.error('Error sending custom message:', err);
+    res.status(500).json({ message: 'Error sending message' });
+  }
+};
+
+// Get Notifications List
+exports.getNotifications = async (req, res) => {
+  const orgId = req.organizationId;
+  try {
+    const [rows] = await db.execute(
+      'SELECT * FROM notifications WHERE organization_id = ? ORDER BY sent_at DESC LIMIT 20',
+      [orgId]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching notifications' });
+  }
+};

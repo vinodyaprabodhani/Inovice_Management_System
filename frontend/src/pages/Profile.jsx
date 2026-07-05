@@ -5,7 +5,7 @@ import { User, Mail, Shield, Building, LogOut, Edit2, X, Check, Save, Lock, Came
 import api from '../api/axios';
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,21 +56,27 @@ const Profile = () => {
       if (avatarFile) data.append('avatar', avatarFile);
       if (removeAvatar) data.append('removeAvatar', 'true');
       
-      const res = await api.put('/users/profile', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await api.put('/users/profile', data);
       
       setMessage(res.data.message);
       setIsEditing(false);
-      
-      const localUser = JSON.parse(localStorage.getItem('user'));
-      if (localUser) {
-        localUser.name = formData.name;
-        localUser.email = formData.email;
-        if (removeAvatar) localUser.avatar = null;
-        else if (res.data.avatar && res.data.avatar !== 'REMOVE') localUser.avatar = res.data.avatar;
-        localStorage.setItem('user', JSON.stringify(localUser));
+
+      let newAvatar = user?.avatar;
+      if (removeAvatar) {
+        newAvatar = null;
+      } else if (res.data.avatar && res.data.avatar !== 'REMOVE') {
+        newAvatar = res.data.avatar;
       }
+
+      updateUser({
+        name: formData.name,
+        email: formData.email,
+        avatar: newAvatar
+      });
+
+      setAvatarPreview(newAvatar ? `${import.meta.env.VITE_UPLOAD_URL || 'http://localhost:5000'}${newAvatar}` : null);
+      setAvatarFile(null);
+      setRemoveAvatar(false);
     } catch (err) {
       setError(err.response?.data?.message || 'Error updating profile');
     } finally {
@@ -86,7 +92,7 @@ const Profile = () => {
           <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-lg flex items-center text-green-700 font-medium">
             <Check size={18} className="mr-3 shrink-0" />
             <div>
-              {message} <button onClick={() => window.location.reload()} className="ml-2 underline hover:text-green-800 font-bold">Refresh page to see changes</button>
+              {message}
             </div>
           </div>
         )}

@@ -40,6 +40,17 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+const db = require('./config/db');
+
+// Ensure users table has avatar column
+db.query("SHOW COLUMNS FROM users LIKE 'avatar'")
+  .then(([rows]) => {
+    if (rows.length === 0) {
+      return db.query("ALTER TABLE users ADD COLUMN avatar VARCHAR(255) DEFAULT NULL");
+    }
+  })
+  .catch(console.error);
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

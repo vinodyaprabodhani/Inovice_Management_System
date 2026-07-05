@@ -52,9 +52,7 @@ const Expenses = () => {
     if (formData.receipt) data.append('receipt', formData.receipt);
 
     try {
-      await api.post('/expenses', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.post('/expenses', data);
       setShowModal(false);
       fetchExpenses();
     } catch (err) {

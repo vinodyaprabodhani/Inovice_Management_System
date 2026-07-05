@@ -5,6 +5,9 @@ const { verifyToken } = require('../middleware/auth');
 
 router.use(verifyToken);
 
+router.get('/', notifController.getNotifications);
+router.post('/custom', notifController.sendCustomMessage);
+
 router.post('/whatsapp/test', notifController.testWhatsApp);
 router.post('/whatsapp/invoice/:invoiceId', notifController.sendWhatsAppInvoice);
 router.post('/email/invoice/:invoiceId', notifController.sendEmailInvoice);

@@ -77,9 +77,7 @@ const Settings = () => {
     if (logo) data.append('logo', logo);
 
     try {
-      await api.put('/organization', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await api.put('/organization', data);
       updateUser({ organizationName: formData.name });
       setMessage('Settings updated successfully!');
       setTimeout(() => setMessage(''), 3000);
