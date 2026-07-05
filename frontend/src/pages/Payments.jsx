@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Layout from '../components/Layout';
 import api from '../api/axios';
 import { 
@@ -23,6 +23,24 @@ const Payments = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [actionMenuOpen, setActionMenuOpen] = useState(null);
+  const dateInputRef = useRef(null);
+
+  const handleDateButtonClick = () => {
+    if (dateInputRef.current) {
+      if (typeof dateInputRef.current.showPicker === 'function') {
+        dateInputRef.current.showPicker();
+      } else {
+        dateInputRef.current.focus();
+      }
+    }
+  };
+
+  const handleDateSelect = (e) => {
+    const selectedDate = e.target.value;
+    if (selectedDate) {
+      setSearchQuery(selectedDate);
+    }
+  };
   const [formData, setFormData] = useState({
     invoice_id: '',
     amount: '',
@@ -50,16 +68,50 @@ const Payments = () => {
     }
   };
 
+  const getNormalizedDateStr = (dateInput) => {
+    if (!dateInput) return '';
+    const str = String(dateInput).trim();
+    const ymdMatch = str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+    if (ymdMatch) {
+      const year = ymdMatch[1];
+      const month = String(ymdMatch[2]).padStart(2, '0');
+      const day = String(ymdMatch[3]).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    const d = new Date(dateInput);
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDisplayDate = (dateInput) => {
+    const norm = getNormalizedDateStr(dateInput);
+    if (!norm) return '';
+    const [y, m, d] = norm.split('-');
+    return `${parseInt(m)}/${parseInt(d)}/${y}`;
+  };
+
   const filteredPayments = (Array.isArray(payments) ? payments : []).filter(p => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return true;
+
+    const paymentDateNorm = getNormalizedDateStr(p.payment_date);
+    const queryDateNorm = getNormalizedDateStr(query);
+
+    // If query is an exact YYYY-MM-DD date string (e.g. from calendar picker)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(queryDateNorm) && /^\d{4}-\d{2}-\d{2}$/.test(query)) {
+      return paymentDateNorm === queryDateNorm;
+    }
+
     const transactionId = (p.transaction_id || `TRX-${p.id}`).toLowerCase();
     const note = (p.note || '').toLowerCase();
     const invoiceNumber = (p.invoice_number || '').toLowerCase();
     const method = (p.payment_method || '').toLowerCase();
     const amount = (p.amount || '').toString();
     const customerName = (p.customer_name || '').toLowerCase();
-    const date = new Date(p.payment_date).toLocaleDateString().toLowerCase();
+    const displayDate = formatDisplayDate(p.payment_date).toLowerCase();
 
     return transactionId.includes(query) ||
            note.includes(query) ||
@@ -67,7 +119,8 @@ const Payments = () => {
            method.includes(query) ||
            amount.includes(query) ||
            customerName.includes(query) ||
-           date.includes(query);
+           paymentDateNorm.includes(query) ||
+           displayDate.includes(query);
   });
 
   const handleSubmit = async (e) => {
@@ -138,15 +191,41 @@ const Payments = () => {
   return (
     <Layout title="Payments">
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex-1 max-w-md relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <div className="flex-1 max-w-md relative flex items-center">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
           <input 
             type="text" 
-            placeholder="Search transactions..." 
+            placeholder="Search transactions by invoice or date..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm"
+            className="w-full pl-10 pr-24 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm"
           />
+          <div className="absolute right-2.5 flex items-center gap-1">
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Clear search"
+              >
+                <X size={15} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleDateButtonClick}
+              className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+              title="Pick date to filter"
+            >
+              <Calendar size={18} />
+            </button>
+            <input 
+              ref={dateInputRef}
+              type="date"
+              className="sr-only"
+              onChange={handleDateSelect}
+            />
+          </div>
         </div>
         
         <button 
@@ -186,7 +265,7 @@ const Payments = () => {
                     {p.invoice_number || 'UNKNOWN'}
                    </div>
                 </td>
-                <td className="px-6 py-4 font-semibold text-gray-900">{new Date(p.payment_date).toLocaleDateString()}</td>
+                <td className="px-6 py-4 font-semibold text-gray-900">{formatDisplayDate(p.payment_date)}</td>
                 <td className="px-6 py-4"><span className="text-sm font-bold text-green-600">+${parseFloat(p.amount).toFixed(2)}</span></td>
                 <td className="px-6 py-4">
                   <span className="px-2 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-600">{p.payment_method}</span>
