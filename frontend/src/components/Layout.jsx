@@ -164,69 +164,6 @@ const Layout = ({ children, title }) => {
           <h2 className="text-xl font-bold text-gray-900">{title}</h2>
           
           <div className="flex items-center gap-6">
-            {/* Search Bar */}
-            <div className="relative hidden md:block">
-              <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 w-72">
-                <Search size={18} className="text-gray-400 mr-2" />
-                <input 
-                  type="text" 
-                  placeholder="Search anything..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                  className="bg-transparent border-none focus:outline-none text-sm w-full"
-                />
-              </div>
-
-              {isSearchFocused && searchQuery.length > 0 && (
-                <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
-                  <div className="p-3 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Search Results</p>
-                    {searching && <Loader2 size={12} className="animate-spin text-gray-400" />}
-                  </div>
-                  <div className="max-h-60 overflow-y-auto">
-                    {searching && searchResults.length === 0 ? (
-                      <div className="p-4 text-center text-sm text-gray-500">Searching...</div>
-                    ) : searchResults.length > 0 ? (
-                      searchResults.map((inv) => (
-                        <Link
-                          key={inv.id}
-                          to={`/invoices/edit/${inv.id}`}
-                          onMouseDown={() => setSearchQuery('')}
-                          className="flex flex-col px-4 py-2.5 hover:bg-gray-50 border-b border-gray-50 last:border-b-0 cursor-pointer block"
-                        >
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm font-semibold text-gray-900">{inv.invoice_number}</span>
-                            <span className="text-sm font-bold text-primary-600">${Number(inv.total || 0).toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between items-center mt-0.5">
-                            <span className="text-xs text-gray-500">{inv.customer_name}</span>
-                            <span className="text-[10px] uppercase font-bold text-gray-400">{inv.status}</span>
-                          </div>
-                        </Link>
-                      ))
-                    ) : (
-                      <div className="p-4 flex flex-col items-center justify-center text-center space-y-2 min-h-[100px]">
-                        <Search size={24} className="text-gray-300" />
-                        <p className="text-sm text-gray-500">No results found for "{searchQuery}"</p>
-                      </div>
-                    )}
-                  </div>
-                  {searchResults.length > 0 && (
-                    <Link
-                      to={`/invoices?search=${encodeURIComponent(searchQuery)}`}
-                      onMouseDown={() => setSearchQuery('')}
-                      className="flex items-center justify-between px-4 py-3 bg-primary-50/50 hover:bg-primary-50 text-xs font-bold text-primary-600 text-center border-t border-gray-100"
-                    >
-                      <span>View all invoice matches</span>
-                      <ArrowRight size={14} />
-                    </Link>
-                  )}
-                </div>
-              )}
-            </div>
-
             <div className="flex items-center gap-4" ref={dropdownRef}>
               {/* Notifications */}
               <div className="relative">
