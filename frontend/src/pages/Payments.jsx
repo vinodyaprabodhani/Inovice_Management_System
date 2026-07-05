@@ -20,6 +20,7 @@ const Payments = () => {
   const [payments, setPayments] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [actionMenuOpen, setActionMenuOpen] = useState(null);
   const [formData, setFormData] = useState({
@@ -36,10 +37,7 @@ const Payments = () => {
 
   const fetchData = async () => {
     try {
-      // For now, let's just fetch all payments. 
-      // We might want an API for all payments across all invoices.
-      // Assuming a generic GET /payments exists or using reports as fallback.
-      const res = await api.get('/payments/all'); // I need to add this route or similar
+      const res = await api.get('/payments/all');
       setPayments(res.data);
       
       const invRes = await api.get('/invoices?status=sent&status=partially_paid');
@@ -50,6 +48,26 @@ const Payments = () => {
       setLoading(false);
     }
   };
+
+  const filteredPayments = payments.filter(p => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
+    const transactionId = (p.transaction_id || `TRX-${p.id}`).toLowerCase();
+    const note = (p.note || '').toLowerCase();
+    const invoiceNumber = (p.invoice_number || '').toLowerCase();
+    const method = (p.payment_method || '').toLowerCase();
+    const amount = (p.amount || '').toString();
+    const customerName = (p.customer_name || '').toLowerCase();
+    const date = new Date(p.payment_date).toLocaleDateString().toLowerCase();
+
+    return transactionId.includes(query) ||
+           note.includes(query) ||
+           invoiceNumber.includes(query) ||
+           method.includes(query) ||
+           amount.includes(query) ||
+           customerName.includes(query) ||
+           date.includes(query);
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -122,6 +140,8 @@ const Payments = () => {
           <input 
             type="text" 
             placeholder="Search transactions..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all text-sm"
           />
         </div>
@@ -151,7 +171,7 @@ const Payments = () => {
           <tbody className="divide-y divide-gray-50">
             {loading ? (
               [...Array(5)].map((_, i) => <tr key={i} className="animate-pulse"><td colSpan="7" className="px-6 py-4"><div className="h-4 bg-gray-100 rounded"></div></td></tr>)
-            ) : payments.length > 0 ? payments.map((p, index) => (
+            ) : filteredPayments.length > 0 ? filteredPayments.map((p, index) => (
               <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
                 <td className="px-6 py-4">
                   <p className="text-sm font-bold text-gray-900 mb-0.5">#{p.transaction_id || `TRX-${p.id}`}</p>
@@ -186,7 +206,7 @@ const Payments = () => {
                    {actionMenuOpen === p.id && (
                      <>
                        <div className="fixed inset-0 z-10" onClick={() => setActionMenuOpen(null)}></div>
-                       <div className={`absolute right-8 ${index >= payments.length - 2 ? 'bottom-10' : 'top-12'} w-48 bg-white border border-gray-100 rounded-xl shadow-lg z-20 py-2 animate-in fade-in zoom-in duration-200`}>
+                       <div className={`absolute right-8 ${index >= filteredPayments.length - 2 ? 'bottom-10' : 'top-12'} w-48 bg-white border border-gray-100 rounded-xl shadow-lg z-20 py-2 animate-in fade-in zoom-in duration-200`}>
                          <button 
                            onClick={() => handleDelete(p.id)}
                            className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 font-medium flex items-center gap-2"
@@ -203,7 +223,9 @@ const Payments = () => {
                 <td colSpan="7" className="px-6 py-12 text-center text-gray-400">
                   <div className="flex flex-col items-center">
                     <CreditCard size={48} className="text-gray-200 mb-4" />
-                    <p className="text-lg font-medium text-gray-400">No payments recorded</p>
+                    <p className="text-lg font-medium text-gray-400">
+                      {searchQuery ? `No transactions found matching "${searchQuery}"` : 'No payments recorded'}
+                    </p>
                   </div>
                 </td>
               </tr>
